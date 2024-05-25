@@ -1,6 +1,10 @@
 import re
 import os
 import time
+import requests
+
+url_requisicoes = "http://127.0.0.1:8081/requisicoes"
+url_clientes = "http://127.0.0.1:8081/clientes"
 
 def menu():
     print("##################################")
@@ -9,6 +13,8 @@ def menu():
     print("##################################")
 
 def criar_cliente():
+    global url_requisicoes
+
     print("----------------------------------")
     nome = input("nome: ")
     while validar_nome(nome) == False:
@@ -30,7 +36,19 @@ def criar_cliente():
         print("----------------------------------")
         tipo_de_conta = input("PJ/PF/CP/CC: ")
     print("----------------------------------")
-    
+
+    senha = input("senha: ")
+    while validar_senha(senha) == False:
+        limpar_terminal()
+        print("----------------------------------")
+        senha = input("senha: ")
+    print("----------------------------------")
+
+    id = gerar_timestamp_id()
+    cliente = {"Nome":f"{nome}", "Idade": f"{idade}", "Tipo de conta":f"{tipo_de_conta}", "id": f"{id}", "Senha": f"{senha}", "Tipo": "novo"}
+
+    # Enviar uma solicitação POST para a API Flask para criar o novo sensor
+    response = requests.post(url_requisicoes, json=cliente, timeout=1)
     print(gerar_timestamp_id())
 
 def gerar_timestamp_id():
@@ -47,6 +65,13 @@ def validar_nome(nome):
     else:
         return False
 
+def validar_senha(senha):
+    # Verifica se a senha corresponde ao padrão
+    if len(senha) >=5 and len(senha) <= 15:
+        return True
+    else:
+        return False
+    
 def validar_idade(idade):
     try:
         # Tenta converter a entrada para um número inteiro
@@ -78,21 +103,51 @@ def limpar_terminal():
         os.system('clear')
 def login():
     print("##################################")
-    print("Número da conta: ")
-    print("Senha: ")
+    id = input("Número da conta: ")
+    cliente = get_cliente(id)
+
+    senha = input("Senha: ")
+    if senha == cliente.get_senha():
+        print("##################################")
+        print("Logando..")
+        return True
+    else:
+        print("##################################")
+        return False
+
+def get_cliente(id):
+    url = f"https://api.example.com/clientes/{id}"  # Substitua pela URL da sua API
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        cliente = response.json()  # Converte a resposta em formato JSON
+        return cliente
+    else:
+        print(f"Erro ao pegar o cliente: {response.status_code}")
+        return None
+def opcoes():
     print("##################################")
-    
+    print("#Consultar Saldo:   (1)          #")
+    print("#Consultar Extrato: (2)          #")
+    print("#Depositar:         (3)          #")
+    print("##################################")
+
 def main():
-    menu()
-    num = int(input(""))
-    while num != 1 and num != 2:
-        limpar_terminal()
+    while True:
         menu()
         num = int(input(""))
-    limpar_terminal()
-    if num == 1:
-        criar_cliente()
-    else:
-        login()
+        while num != 1 and num != 2:
+            limpar_terminal()
+            menu()
+            num = int(input(""))
+        limpar_terminal()
+        if num == 1:
+            criar_cliente()
+        else:
+            if login():
+                opcoes()
+            else:
+                continue    
+        
 if __name__ == "__main__":
     main()
