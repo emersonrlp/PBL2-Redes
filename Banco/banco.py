@@ -1,47 +1,14 @@
-class Cliente:
-    def __init__(self, nome, idade, tipo_de_conta, id_da_conta, saldo=0.0):
-        self._nome = nome
-        self._idade = idade
-        self._tipo_de_conta = tipo_de_conta
-        self._id_da_conta = id_da_conta
-        self._saldo = saldo
+from cliente import Cliente
 
-    # Getter e Setter para o nome
-    def get_nome(self):
-        return self._nome
+# Criando um objeto da classe Cliente
+cliente1 = Cliente(nome="Maria", idade=28, tipo_de_conta="Corrente", id_da_conta="12345")
 
-    def set_nome(self, nome):
-        self._nome = nome
+# Usando os métodos do objeto cliente1
+cliente1.mostrar_informacoes()
+cliente1.depositar(1000)
+cliente1.sacar(500)
 
-    # Getter e Setter para o idade
-    def get_idade(self):
-        return self._idade
-
-    def set_idade(self, idade):
-        self._idade = idade
-    
-    # Getter para tipo de conta
-    def get_tipo_de_conta(self):
-        return self._tipo_de_conta
-    
-    # Getter para id da conta
-    def get_id_da_conta(self):
-        return self._id_da_conta
-    
-    def depositar(self, valor):
-        self._saldo += valor
-        print(f"{valor} depositados. Novo saldo: {self._saldo:.2f}")
-
-    def sacar(self, valor):
-        if valor > self._saldo:
-            print("Saldo insuficiente!")
-        else:
-            self._saldo -= valor
-            print(f"{valor} sacados. Novo saldo: {self._saldo:.2f}")
-
-    def mostrar_informacoes(self):
-        print(f"Nome: {self._nome}")
-        print(f"Idade: {self._idade}")
-        print(f"Tipo de Conta: {self._tipo_de_conta}")
-        print(f"ID da Conta: {self._id_da_conta}")
-        print(f"Saldo: {self._saldo:.2f}")
+# Mudando o nome e a idade, e mostrando as informações novamente
+cliente1.set_nome("Yan")
+cliente1.set_idade(30)
+cliente1.mostrar_informacoes()
