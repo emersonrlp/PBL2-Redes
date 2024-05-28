@@ -6,6 +6,8 @@ import requests
 url_requisicoes = "http://127.0.0.1:8081/requisicoes"
 url_clientes = "http://127.0.0.1:8081/clientes"
 
+bancos = {"BB": "127.0.0.1"}
+
 def menu():
     print("##################################")
     print("#Criar conta: (1)                #")
@@ -69,7 +71,7 @@ def validar_nome(nome):
 
 def validar_senha(senha):
     # Verifica se a senha corresponde ao padrão
-    if len(senha) >=5 and len(senha) <= 15:
+    if len(senha) >= 5 and len(senha) <= 15:
         return True
     else:
         return False
@@ -105,7 +107,7 @@ def limpar_terminal():
         os.system('clear')
 def login():
     print("##################################")
-    id = input("Número da conta: ")
+    id = int(input("Número da conta: "))
     cliente = obter_cliente(id)
 
     senha = input("Senha: ")
@@ -132,7 +134,7 @@ def get_cliente(id):
         pass
 
 def valida_num(num):
-    if num != 1 and num != 2 and num != 3:
+    if num != 1 and num != 2 and num != 3 and num != 4 and num != 5:
         True
     else:
         False
@@ -151,9 +153,22 @@ def tabela_opcoes():
     print("#Consultar Saldo:   (1)          #")
     print("#Consultar Extrato: (2)          #")
     print("#Depositar:         (3)          #")
+    print("#Sacar:             (4)          #")
+    print("#Transferir:        (5)          #")
     print("##################################")  
 
+def verificar_banco(banco):
+    global bancos
+
+    for item in bancos:
+        if banco in item:
+            return True
+    return False
+
 def opcoes(id):
+    global url_requisicoes
+    global bancos 
+
     tabela_opcoes()
     num =  int(input("-> "))
     while valida_num(num):
@@ -163,12 +178,45 @@ def opcoes(id):
     if num == 1:
         cliente = obter_cliente(id)
         print("--------------------------")
-        print(f"Saldo: {cliente["saldo"]}")
+        print("Saldo: {}".format(cliente["saldo"]))
         print("--------------------------")
+        input("Precione enter para continuar! ")
+        limpar_terminal()
     elif num == 2:
         pass
+    elif num == 3:
+        valor = int(input("valor: "))
+        deposito = {"Numero da conta": f"{id}", "valor": valor, "Tipo": "depositar"}
+        try:
+            # Enviar uma solicitação POST para a API Flask para criar depositar
+            response = requests.post(url_requisicoes, json=deposito, timeout=1)
+        except Exception as e:
+            print("", e)
+    elif num == 4:
+        valor = int(input("valor: "))
+        saque = {"Numero da conta": f"{id}", "valor": valor, "Tipo": "sacar"}
+        try:
+            # Enviar uma solicitação POST para a API Flask para criar depositar
+            response = requests.post(url_requisicoes, json=saque, timeout=1)
+        except Exception as e:
+            print("", e)
     else:
-        pass
+        banco = input("Banco: ")
+        while verificar_banco(banco) == False or banco == "":
+            banco = input("Banco: ")
+        id_banco = bancos[banco]
+
+        valor = input("valor: ")
+        while valor.isdigit() == False:
+            valor = input("valor: ")
+        valor = int(valor)
+
+        transferencia = {"Numero da conta": f"{id}", "valor": valor, "Tipo": "transferir"}
+        try:
+            url_transferencia = "http://{}:8081/requisicoes".format(id_banco)
+            response = requests.post(url_transferencia, json=transferencia, timeout=1)
+        except Exception as e:
+            print("", e)
 
 def main():
     while True:
@@ -179,14 +227,20 @@ def main():
             menu()
             num = int(input(""))
         limpar_terminal()
+
         if num == 1:
             criar_cliente()
         else:
             sucesso, id = login()
+            limpar_terminal()
             if sucesso:
-                opcoes(id)
+                while True:
+                    opcoes(id)
+                    limpar_terminal()
             else:
-                continue    
-        
+                continue   
+
+        limpar_terminal()
+
 if __name__ == "__main__":
     main()

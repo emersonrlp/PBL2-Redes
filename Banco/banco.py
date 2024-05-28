@@ -45,9 +45,26 @@ def receber_requisicoes():
                 if requisicao["Tipo"] == "novo":
                     cliente = Cliente(requisicao["Nome"], int(requisicao["Idade"]), requisicao["Tipo de conta"], int(requisicao["Numero da conta"]), requisicao["Senha"])
                     usuarios.append(cliente)
+                    print("{}".format(cliente.get_id_da_conta()))
                     # Enviar uma solicitação POST para a API Flask para criar o novo cliente
                     response = requests.post(url_clientes, json=cliente.to_dict())
                     remover_requisição(1)
+                elif requisicao["Tipo"] == "extrato":
+                    continue
+                elif requisicao["Tipo"] == "depositar" or requisicao["Tipo"] == "transferir":
+                    for item in usuarios:
+                        if item.get_id_da_conta() == int(requisicao["Numero da conta"]):
+                            item.depositar(requisicao["valor"])
+                            url_cliente = 'http://127.0.0.1:8081/clientes/'+ requisicao["Numero da conta"]
+                            response = requests.put(url_cliente, json=item.to_dict())
+                            remover_requisição(1)
+                elif requisicao["Tipo"] == "sacar":
+                    for item in usuarios:
+                        if item.get_id_da_conta() == int(requisicao["Numero da conta"]):
+                            item.depositar(-requisicao["valor"])
+                            url_cliente = 'http://127.0.0.1:8081/clientes/'+ requisicao["Numero da conta"]
+                            response = requests.put(url_cliente, json=item.to_dict())
+                            remover_requisição(1)
     except Exception as e:
         print("", e)
 
