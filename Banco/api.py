@@ -21,7 +21,6 @@ def get_cliente(cliente_id):
 @app.route('/clientes', methods=['POST'])
 def criar_cliente():
     novo_cliente = request.json
-    novo_cliente['id'] = len(clientes) + 1
     clientes.append(novo_cliente)
     return jsonify(novo_cliente), 201
 
@@ -55,6 +54,7 @@ def get_requisicao(requisicao_id):
 @app.route('/requisicoes', methods=['POST'])
 def criar_requisicao():
     nova_requisicao = request.json
+    nova_requisicao['id'] = len(requisicoes) + 1
     requisicoes.append(nova_requisicao)
     return jsonify(nova_requisicao), 201
 

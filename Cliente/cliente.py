@@ -45,11 +45,13 @@ def criar_cliente():
     print("----------------------------------")
 
     id = gerar_timestamp_id()
-    cliente = {"Nome":f"{nome}", "Idade": f"{idade}", "Tipo de conta":f"{tipo_de_conta}", "id": f"{id}", "Senha": f"{senha}", "Tipo": "novo"}
-
-    # Enviar uma solicitação POST para a API Flask para criar o novo sensor
-    response = requests.post(url_requisicoes, json=cliente, timeout=1)
-    print(gerar_timestamp_id())
+    cliente = {"Nome":f"{nome}", "Idade": f"{idade}", "Tipo de conta":f"{tipo_de_conta}", "Numero da conta": f"{id}", "Senha": f"{senha}", "Tipo": "novo"}
+    try:
+        # Enviar uma solicitação POST para a API Flask para criar o novo sensor
+        response = requests.post(url_requisicoes, json=cliente, timeout=1)
+        print(gerar_timestamp_id())
+    except Exception as e:
+        print("", e)
 
 def gerar_timestamp_id():
     return str(int(time.time() * 1000))
@@ -95,7 +97,7 @@ def validar_conta(tipo_de_conta):
         return True
     else:
         return False 
-    
+
 def limpar_terminal():
     if os.name == 'nt':  # Verifica se o sistema operacional é Windows
         os.system('cls')
@@ -104,33 +106,69 @@ def limpar_terminal():
 def login():
     print("##################################")
     id = input("Número da conta: ")
-    cliente = get_cliente(id)
+    cliente = obter_cliente(id)
 
     senha = input("Senha: ")
-    if senha == cliente.get_senha():
+    if senha == cliente["Senha"]:
         print("##################################")
         print("Logando..")
-        return True
+        return True, id
     else:
         print("##################################")
         return False
 
 def get_cliente(id):
-    url = f"https://api.example.com/clientes/{id}"  # Substitua pela URL da sua API
-    response = requests.get(url)
+    try:
+        url = f"https://127.0.0.1:8081/clientes/{id}"  # Substitua pela URL da sua API
+        response = requests.get(url)
 
-    if response.status_code == 200:
-        cliente = response.json()  # Converte a resposta em formato JSON
-        return cliente
+        if response.status_code == 200:
+            cliente = response.json()  # Converte a resposta em formato JSON
+            return cliente
+        else:
+            print(f"Erro ao pegar o cliente: {response.status_code}")
+            return None
+    except:
+        pass
+
+def valida_num(num):
+    if num != 1 and num != 2 and num != 3:
+        True
     else:
-        print(f"Erro ao pegar o cliente: {response.status_code}")
+        False
+
+def obter_cliente(id):
+    url_cliente = f"http://127.0.0.1:8081/clientes/{id}"
+    response = requests.get(url_cliente)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("Erro ao obter cliente:", response.status_code)
         return None
-def opcoes():
+ 
+def tabela_opcoes():
     print("##################################")
     print("#Consultar Saldo:   (1)          #")
     print("#Consultar Extrato: (2)          #")
     print("#Depositar:         (3)          #")
-    print("##################################")
+    print("##################################")  
+
+def opcoes(id):
+    tabela_opcoes()
+    num =  int(input("-> "))
+    while valida_num(num):
+        limpar_terminal()
+        tabela_opcoes()
+        num =  input("-> ")
+    if num == 1:
+        cliente = obter_cliente(id)
+        print("--------------------------")
+        print(f"Saldo: {cliente["saldo"]}")
+        print("--------------------------")
+    elif num == 2:
+        pass
+    else:
+        pass
 
 def main():
     while True:
@@ -144,8 +182,9 @@ def main():
         if num == 1:
             criar_cliente()
         else:
-            if login():
-                opcoes()
+            sucesso, id = login()
+            if sucesso:
+                opcoes(id)
             else:
                 continue    
         
