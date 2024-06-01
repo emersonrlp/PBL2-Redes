@@ -3,41 +3,41 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)
 
 # Lista de sensores e solicitações
-clientes = []
+contas = []
 requisicoes = []
 
 # Rotas para sensores
-@app.route('/clientes', methods=['GET'])
+@app.route('/contas', methods=['GET'])
 def get_clientes():
-    return jsonify(clientes)
+    return jsonify(contas)
 
-@app.route('/clientes/<int:cliente_id>', methods=['GET'])
-def get_cliente(cliente_id):
-    cliente = next((cliente for cliente in clientes if cliente['id'] == cliente_id), None)
-    if cliente:
-        return jsonify(cliente)
-    return jsonify({'message': 'Cliente não encontrado'}), 404
+@app.route('/contas/<int:conta_id>', methods=['GET'])
+def get_conta(conta_id):
+    conta = next((conta for conta in contas if conta['id'] == conta_id), None)
+    if conta:
+        return jsonify(conta)
+    return jsonify({'message': 'Conta não encontrada'}), 404
 
-@app.route('/clientes', methods=['POST'])
-def criar_cliente():
-    novo_cliente = request.json
-    clientes.append(novo_cliente)
-    return jsonify(novo_cliente), 201
+@app.route('/contas', methods=['POST'])
+def criar_conta():
+    nova_conta = request.json
+    contas.append(nova_conta)
+    return jsonify(nova_conta), 201
 
-@app.route('/clientes/<int:cliente_id>', methods=['PUT'])
-def atualizar_cliente(cliente_id):
-    cliente = next((cliente for cliente in clientes if cliente['id'] == cliente_id), None)
-    if not cliente:
-        return jsonify({'message': 'Cliente não encontrado'}), 404
+@app.route('/contas/<int:conta_id>', methods=['PUT'])
+def atualizar_conta(conta_id):
+    conta = next((conta for conta in contas if conta['id'] == conta_id), None)
+    if not conta:
+        return jsonify({'message': 'Conta não encontrada'}), 404
     dados_atualizados = request.json
-    cliente.update(dados_atualizados)
-    return jsonify(cliente)
+    conta.update(dados_atualizados)
+    return jsonify(conta)
 
-@app.route('/clientes/<int:cliente_id>', methods=['DELETE'])
-def excluir_cliente(cliente_id):
-    global clientes
-    clientes = [cliente for cliente in clientes if cliente['id'] != cliente_id]
-    return jsonify({'message': 'Cliente excluído com sucesso'})
+@app.route('/contas/<int:conta_id>', methods=['DELETE'])
+def excluir_conta(conta_id):
+    global contas
+    contas = [conta for conta in contas if conta['id'] != conta_id]
+    return jsonify({'message': 'Conta excluída com sucesso'})
 
 # Rotas para sensores
 @app.route('/requisicoes', methods=['GET'])

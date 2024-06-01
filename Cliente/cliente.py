@@ -1,12 +1,11 @@
 import re
 import os
-import time
 import requests
+import random
 
 url_requisicoes = "http://127.0.0.1:8081/requisicoes"
-url_clientes = "http://127.0.0.1:8081/clientes"
-
-bancos = {"BB": "127.0.0.1"}
+url_contas = "http://127.0.0.1:8081/contas"
+ip_local = "192.168.1.106"
 
 def menu():
     print("##################################")
@@ -14,29 +13,15 @@ def menu():
     print("#Fazer login: (2)                #")
     print("##################################")
 
-def criar_cliente():
+def criar_conta():
     global url_requisicoes
 
     print("----------------------------------")
-    nome = input("nome: ")
-    while validar_nome(nome) == False:
-        limpar_terminal()
-        print("----------------------------------")
-        nome = input("nome: ")
-    print("----------------------------------")
-
-    idade = input("idade: ")
-    while validar_idade(idade) == False:
-        limpar_terminal()
-        print("----------------------------------")
-        idade = input("idade: ")
-    print("----------------------------------")
-
-    tipo_de_conta = input("PJ/PF/CP/CC: ")
+    tipo_de_conta = input("Pessoal ou Conjunta: (P)/(C): ")
     while validar_conta(tipo_de_conta) == False:
         limpar_terminal()
         print("----------------------------------")
-        tipo_de_conta = input("PJ/PF/CP/CC: ")
+        tipo_de_conta = input("Pessoal ou Conjunta: (P)/(C): ")
     print("----------------------------------")
 
     senha = input("senha: ")
@@ -46,17 +31,45 @@ def criar_cliente():
         senha = input("senha: ")
     print("----------------------------------")
 
+    num = 1
+    clientes = []
+    while num != 2:
+        limpar_terminal()
+        print("----------------------------------")
+        nome = input("nome: ")
+        while validar_nome(nome) == False:
+            limpar_terminal()
+            print("----------------------------------")
+            nome = input("nome: ")
+        print("----------------------------------")
+
+        idade = input("idade: ")
+        while validar_idade(idade) == False:
+            limpar_terminal()
+            print("----------------------------------")
+            idade = input("idade: ")
+        print("----------------------------------")
+        
+        
+        clientes.append((nome, idade))
+        num = int(input("Adicionar dono (1): \nCriar conta: (2)"))
+        while num != 2 and num != 1:
+            num = int(input("Adicionar dono (1): \nCriar conta: (2)"))
+
     id = gerar_timestamp_id()
-    cliente = {"Nome":f"{nome}", "Idade": f"{idade}", "Tipo de conta":f"{tipo_de_conta}", "Numero da conta": f"{id}", "Senha": f"{senha}", "Tipo": "novo"}
+    cliente = {"Clientes":f"{clientes}", "Tipo de conta":f"{tipo_de_conta}", "Numero da conta": f"{id}", "Senha": f"{senha}", "Tipo": "novo"}
     try:
         # Enviar uma solicitação POST para a API Flask para criar o novo sensor
         response = requests.post(url_requisicoes, json=cliente, timeout=1)
-        print(gerar_timestamp_id())
+        print("id:", id)
+        input("Digite enter para voltar ao menu! ")
     except Exception as e:
         print("", e)
 
 def gerar_timestamp_id():
-    return str(int(time.time() * 1000))
+    numeros = [str(random.randint(0, 9)) for _ in range(5)]
+    ip_aleatorio = ''.join(numeros) + ip_local[12]
+    return ip_aleatorio
 
 def validar_nome(nome):
     # Define o padrão regex para um nome válido
@@ -92,7 +105,7 @@ def validar_idade(idade):
 
 def validar_conta(tipo_de_conta):
     # Define o padrão regex para uma conta válida
-    padrao = re.compile(r"^(pj|pf|cp|cc|PJ|PF|CP|CC)$")
+    padrao = re.compile(r"^(p|c|P|C)$")
 
     # Verifica se o tipo de conta é válido 
     if padrao.match(tipo_de_conta):
@@ -105,10 +118,11 @@ def limpar_terminal():
         os.system('cls')
     else:
         os.system('clear')
+
 def login():
     print("##################################")
     id = int(input("Número da conta: "))
-    cliente = obter_cliente(id)
+    cliente = obter_conta(id)
 
     senha = input("Senha: ")
     if senha == cliente["Senha"]:
@@ -119,33 +133,19 @@ def login():
         print("##################################")
         return False
 
-def get_cliente(id):
-    try:
-        url = f"https://127.0.0.1:8081/clientes/{id}"  # Substitua pela URL da sua API
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            cliente = response.json()  # Converte a resposta em formato JSON
-            return cliente
-        else:
-            print(f"Erro ao pegar o cliente: {response.status_code}")
-            return None
-    except:
-        pass
-
 def valida_num(num):
     if num != 1 and num != 2 and num != 3 and num != 4 and num != 5:
         True
     else:
         False
 
-def obter_cliente(id):
-    url_cliente = f"http://127.0.0.1:8081/clientes/{id}"
-    response = requests.get(url_cliente)
+def obter_conta(id):
+    url_conta = f"http://127.0.0.1:8081/contas/{id}"
+    response = requests.get(url_conta)
     if response.status_code == 200:
         return response.json()
     else:
-        print("Erro ao obter cliente:", response.status_code)
+        print("Erro ao obter conta:", response.status_code)
         return None
  
 def tabela_opcoes():
@@ -157,17 +157,8 @@ def tabela_opcoes():
     print("#Transferir:        (5)          #")
     print("##################################")  
 
-def verificar_banco(banco):
-    global bancos
-
-    for item in bancos:
-        if banco in item:
-            return True
-    return False
-
 def opcoes(id):
-    global url_requisicoes
-    global bancos 
+    global url_requisicoes 
 
     tabela_opcoes()
     num =  int(input("-> "))
@@ -176,9 +167,9 @@ def opcoes(id):
         tabela_opcoes()
         num =  input("-> ")
     if num == 1:
-        cliente = obter_cliente(id)
+        conta = obter_conta(id)
         print("--------------------------")
-        print("Saldo: {}".format(cliente["saldo"]))
+        print("Saldo: {}".format(conta["saldo"]))
         print("--------------------------")
         input("Precione enter para continuar! ")
         limpar_terminal()
@@ -201,10 +192,10 @@ def opcoes(id):
         except Exception as e:
             print("", e)
     else:
-        banco = input("Banco: ")
-        while verificar_banco(banco) == False or banco == "":
-            banco = input("Banco: ")
-        id_banco = bancos[banco]
+        chave = input("Chave pix: ")
+        while chave.isdigit() == False or len(chave) != 6:
+            chave = input("Chave pix: ")
+        url_transferencia = f"http://192.168.1.10{chave[5]}:8081/requisicoes"
 
         valor = input("valor: ")
         while valor.isdigit() == False:
@@ -213,7 +204,6 @@ def opcoes(id):
 
         transferencia = {"Numero da conta": f"{id}", "valor": valor, "Tipo": "transferir"}
         try:
-            url_transferencia = "http://{}:8081/requisicoes".format(id_banco)
             response = requests.post(url_transferencia, json=transferencia, timeout=1)
         except Exception as e:
             print("", e)
@@ -229,7 +219,7 @@ def main():
         limpar_terminal()
 
         if num == 1:
-            criar_cliente()
+            criar_conta()
         else:
             sucesso, id = login()
             limpar_terminal()

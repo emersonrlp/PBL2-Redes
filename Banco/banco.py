@@ -1,15 +1,15 @@
-from cliente import Cliente
+from conta import Conta
 import requests
 from api import app
 import threading
 import time
 
-url_clientes = "http://127.0.0.1:8081/clientes"
-usuarios = []
+url_contas = "http://127.0.0.1:8081/contas"
+contas = []
 
 def obter_lista_clientes():
-    global url_clientes
-    response = requests.get(url_clientes)
+    global url_contas
+    response = requests.get(url_contas)
     if response.status_code == 200:
         return response.json()
     else:
@@ -33,8 +33,8 @@ def remover_requisição(requisicoes_id):
         print("Erro ao remover requisição:", response.status_code)
 
 def receber_requisicoes():
-    global url_clientes
-    global usuarios
+    global url_contas
+    global contas
 
     try:
         while True:   
@@ -43,27 +43,27 @@ def receber_requisicoes():
             if len(requisicoes) > 0:
                 requisicao = requisicoes[0]
                 if requisicao["Tipo"] == "novo":
-                    cliente = Cliente(requisicao["Nome"], int(requisicao["Idade"]), requisicao["Tipo de conta"], int(requisicao["Numero da conta"]), requisicao["Senha"])
-                    usuarios.append(cliente)
-                    print("{}".format(cliente.get_id_da_conta()))
+                    conta = Conta(requisicao["Clientes"], requisicao["Tipo de conta"], int(requisicao["Numero da conta"]), requisicao["Senha"])
+                    contas.append(conta)
+                    print("{}".format(conta.get_id_da_conta()))
                     # Enviar uma solicitação POST para a API Flask para criar o novo cliente
-                    response = requests.post(url_clientes, json=cliente.to_dict())
+                    response = requests.post(url_contas, json=conta.to_dict())
                     remover_requisição(1)
                 elif requisicao["Tipo"] == "extrato":
                     continue
                 elif requisicao["Tipo"] == "depositar" or requisicao["Tipo"] == "transferir":
-                    for item in usuarios:
+                    for item in contas:
                         if item.get_id_da_conta() == int(requisicao["Numero da conta"]):
                             item.depositar(requisicao["valor"])
-                            url_cliente = 'http://127.0.0.1:8081/clientes/'+ requisicao["Numero da conta"]
-                            response = requests.put(url_cliente, json=item.to_dict())
+                            url_conta = 'http://127.0.0.1:8081/contas/'+ requisicao["Numero da conta"]
+                            response = requests.put(url_conta, json=item.to_dict())
                             remover_requisição(1)
                 elif requisicao["Tipo"] == "sacar":
-                    for item in usuarios:
+                    for item in contas:
                         if item.get_id_da_conta() == int(requisicao["Numero da conta"]):
                             item.depositar(-requisicao["valor"])
-                            url_cliente = 'http://127.0.0.1:8081/clientes/'+ requisicao["Numero da conta"]
-                            response = requests.put(url_cliente, json=item.to_dict())
+                            url_conta = 'http://127.0.0.1:8081/contas/'+ requisicao["Numero da conta"]
+                            response = requests.put(url_conta, json=item.to_dict())
                             remover_requisição(1)
     except Exception as e:
         print("", e)
