@@ -6,7 +6,7 @@ import random
 url_depositos = "http://127.0.0.1:8081/depositos"
 url_saques = "http://127.0.0.1:8081/saques"
 url_contas = "http://127.0.0.1:8081/contas"
-ip_local = "192.168.1.106"
+ip_local = "192.168.1.106" #Pegar da variavel de ambiente
 
 def menu():
     print("##################################")
@@ -53,17 +53,20 @@ def criar_conta():
         
         
         clientes.append((nome, idade))
-        num = int(input("Adicionar dono (1): \nCriar conta: (2):\n"))
+        limpar_terminal()
+        print("----------------------------------")
+        num = int(input("Adicionar dono (1): \nCriar conta: (2):\n----------------------------------\n"))
         while num != 2 and num != 1:
-            num = int(input("Adicionar dono (1): \nCriar conta: (2):\n"))
+            limpar_terminal()
+            print("----------------------------------")
+            num = int(input("Adicionar dono (1): \nCriar conta: (2):\n----------------------------------\n"))
 
     id = gerar_timestamp_id()
     cliente = {"Clientes":f"{clientes}", "Tipo de conta":f"{tipo_de_conta}", "id": int(id), "Senha": f"{senha}", "Tipo": "novo", "Saldo": 0.0}
     try:
         # Enviar uma solicitação POST para a API Flask para criar o novo sensor
         response = requests.post(url_contas, json=cliente, timeout=1)
-        print("id:", id)
-        input("Digite enter para voltar ao menu! ")
+        input("\nDigite enter para voltar ao menu! ")
     except Exception as e:
         print("", e)
 
@@ -207,6 +210,15 @@ def opcoes(id):
         transferencia = {"id": id, "Valor": valor}
         try:
             response = requests.post(url_transferencias, json=transferencia, timeout=1)
+            if response.status_code == 201:
+                saque = {"id": id, "Valor": valor}
+                try:
+                    # Enviar uma solicitação POST para a API Flask para criar depositar
+                    response = requests.post(url_saques, json=saque, timeout=1)
+                except Exception as e:
+                    print("", e)
+            else:
+                print("Erro ao fazer PIX! ")
         except Exception as e:
             print("", e)
 
