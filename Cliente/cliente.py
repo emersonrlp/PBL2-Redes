@@ -3,7 +3,8 @@ import os
 import requests
 import random
 
-url_requisicoes = "http://127.0.0.1:8081/requisicoes"
+url_depositos = "http://127.0.0.1:8081/depositos"
+url_saques = "http://127.0.0.1:8081/saques"
 url_contas = "http://127.0.0.1:8081/contas"
 ip_local = "192.168.1.106"
 
@@ -14,7 +15,7 @@ def menu():
     print("##################################")
 
 def criar_conta():
-    global url_requisicoes
+    global url_contas
 
     print("----------------------------------")
     tipo_de_conta = input("Pessoal ou Conjunta: (P)/(C): ")
@@ -52,15 +53,15 @@ def criar_conta():
         
         
         clientes.append((nome, idade))
-        num = int(input("Adicionar dono (1): \nCriar conta: (2)"))
+        num = int(input("Adicionar dono (1): \nCriar conta: (2):\n"))
         while num != 2 and num != 1:
-            num = int(input("Adicionar dono (1): \nCriar conta: (2)"))
+            num = int(input("Adicionar dono (1): \nCriar conta: (2):\n"))
 
     id = gerar_timestamp_id()
-    cliente = {"Clientes":f"{clientes}", "Tipo de conta":f"{tipo_de_conta}", "Numero da conta": f"{id}", "Senha": f"{senha}", "Tipo": "novo"}
+    cliente = {"Clientes":f"{clientes}", "Tipo de conta":f"{tipo_de_conta}", "id": int(id), "Senha": f"{senha}", "Tipo": "novo", "Saldo": 0.0}
     try:
         # Enviar uma solicitação POST para a API Flask para criar o novo sensor
-        response = requests.post(url_requisicoes, json=cliente, timeout=1)
+        response = requests.post(url_contas, json=cliente, timeout=1)
         print("id:", id)
         input("Digite enter para voltar ao menu! ")
     except Exception as e:
@@ -158,7 +159,8 @@ def tabela_opcoes():
     print("##################################")  
 
 def opcoes(id):
-    global url_requisicoes 
+    global url_depositos 
+    global url_saques
 
     tabela_opcoes()
     num =  int(input("-> "))
@@ -169,7 +171,7 @@ def opcoes(id):
     if num == 1:
         conta = obter_conta(id)
         print("--------------------------")
-        print("Saldo: {}".format(conta["saldo"]))
+        print("Saldo: {}".format(conta["Saldo"]))
         print("--------------------------")
         input("Precione enter para continuar! ")
         limpar_terminal()
@@ -177,34 +179,34 @@ def opcoes(id):
         pass
     elif num == 3:
         valor = int(input("valor: "))
-        deposito = {"Numero da conta": f"{id}", "valor": valor, "Tipo": "depositar"}
+        deposito = {"id": id, "Valor": valor}
         try:
             # Enviar uma solicitação POST para a API Flask para criar depositar
-            response = requests.post(url_requisicoes, json=deposito, timeout=1)
+            response = requests.post(url_depositos, json=deposito, timeout=1)
         except Exception as e:
             print("", e)
     elif num == 4:
         valor = int(input("valor: "))
-        saque = {"Numero da conta": f"{id}", "valor": valor, "Tipo": "sacar"}
+        saque = {"id": id, "Valor": valor}
         try:
             # Enviar uma solicitação POST para a API Flask para criar depositar
-            response = requests.post(url_requisicoes, json=saque, timeout=1)
+            response = requests.post(url_saques, json=saque, timeout=1)
         except Exception as e:
             print("", e)
     else:
         chave = input("Chave pix: ")
         while chave.isdigit() == False or len(chave) != 6:
             chave = input("Chave pix: ")
-        url_transferencia = f"http://192.168.1.10{chave[5]}:8081/requisicoes"
+        url_transferencias = f"http://192.168.1.10{chave[5]}:8081/transferencias"
 
         valor = input("valor: ")
         while valor.isdigit() == False:
             valor = input("valor: ")
         valor = int(valor)
 
-        transferencia = {"Numero da conta": f"{id}", "valor": valor, "Tipo": "transferir"}
+        transferencia = {"id": id, "Valor": valor}
         try:
-            response = requests.post(url_transferencia, json=transferencia, timeout=1)
+            response = requests.post(url_transferencias, json=transferencia, timeout=1)
         except Exception as e:
             print("", e)
 
