@@ -17,49 +17,42 @@ def menu():
 def criar_conta():
     global url_contas
 
-    print("----------------------------------")
-    tipo_de_conta = input("Pessoal ou Conjunta: (P)/(C): ")
-    while validar_conta(tipo_de_conta) == False:
-        limpar_terminal()
-        print("----------------------------------")
-        tipo_de_conta = input("Pessoal ou Conjunta: (P)/(C): ")
-    print("----------------------------------")
-
-    senha = input("senha: ")
-    while validar_senha(senha) == False:
-        limpar_terminal()
-        print("----------------------------------")
-        senha = input("senha: ")
-    print("----------------------------------")
-
     num = 1
     clientes = []
     while num != 2:
-        limpar_terminal()
         print("----------------------------------")
         nome = input("nome: ")
         while validar_nome(nome) == False:
-            limpar_terminal()
             print("----------------------------------")
             nome = input("nome: ")
         print("----------------------------------")
 
         idade = input("idade: ")
         while validar_idade(idade) == False:
-            limpar_terminal()
             print("----------------------------------")
             idade = input("idade: ")
         print("----------------------------------")
         
         
         clientes.append((nome, idade))
-        limpar_terminal()
         print("----------------------------------")
-        num = int(input("Adicionar dono (1): \nCriar conta: (2):\n----------------------------------\n"))
+        num = int(input("Adicionar outro usuário (1): \nContinuar: (2):\n----------------------------------\n"))
         while num != 2 and num != 1:
-            limpar_terminal()
             print("----------------------------------")
-            num = int(input("Adicionar dono (1): \nCriar conta: (2):\n----------------------------------\n"))
+            num = int(input("Adicionar outro usuário (1): \nContinuar: (2):\n----------------------------------\n"))
+
+    print("----------------------------------")
+    tipo_de_conta = input("Conta Pessoal ou Conjunta: (P)/(C): ")
+    while validar_conta(tipo_de_conta) == False:
+        print("----------------------------------")
+        tipo_de_conta = input("Conta Pessoal ou Conjunta: (P)/(C): ")
+    print("----------------------------------")
+
+    senha = input("senha: ")
+    while validar_senha(senha) == False:
+        print("----------------------------------")
+        senha = input("senha: ")
+    print("----------------------------------")
 
     id = gerar_timestamp_id()
     cliente = {"Clientes":f"{clientes}", "Tipo de conta":f"{tipo_de_conta}", "id": int(id), "Senha": f"{senha}", "Tipo": "novo", "Saldo": 0.0}
@@ -207,18 +200,9 @@ def opcoes(id):
             valor = input("valor: ")
         valor = int(valor)
 
-        transferencia = {"id": id, "Valor": valor}
+        transferencia = {"id": int(chave), "Valor": valor, "id_remetente": str(id)}
         try:
             response = requests.post(url_transferencias, json=transferencia, timeout=1)
-            if response.status_code == 201:
-                saque = {"id": id, "Valor": valor}
-                try:
-                    # Enviar uma solicitação POST para a API Flask para criar depositar
-                    response = requests.post(url_saques, json=saque, timeout=1)
-                except Exception as e:
-                    print("", e)
-            else:
-                print("Erro ao fazer PIX! ")
         except Exception as e:
             print("", e)
 

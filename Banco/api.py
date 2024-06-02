@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+import requests
 
 app = Flask(__name__)
 
@@ -60,6 +61,13 @@ def criar_transferencia():
     for item in contas:
         if item["id"] == nova_transferencia["id"]:
             item["Saldo"] = item["Saldo"] + nova_transferencia["Valor"]
+            saque = {"id": int(nova_transferencia["id_remetente"]), "Valor": nova_transferencia["Valor"]}
+            try:
+                # Enviar uma solicitação POST para a API Flask para criar depositar
+                url_saques = f"http://192.168.1.10{nova_transferencia["id_remetente"][5]}:8081/saques"
+                response = requests.post(url_saques, json=saque, timeout=1)
+            except Exception as e:
+                print("", e)
     return jsonify(nova_transferencia), 201
 
 if __name__ == "__main__":
