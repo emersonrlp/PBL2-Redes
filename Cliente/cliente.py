@@ -199,12 +199,17 @@ def opcoes(id):
         while valor.isdigit() == False:
             valor = input("valor: ")
         valor = int(valor)
-
-        transferencia = {"id": int(chave), "Valor": valor, "id_remetente": str(id)}
-        try:
-            response = requests.post(url_transferencias, json=transferencia, timeout=1)
-        except Exception as e:
-            print("", e)
+        
+        conta = obter_conta(id)
+        if conta["Saldo"] >= valor:
+            transferencia = {"id": int(chave), "Valor": valor, "id_remetente": str(id)}
+            try:
+                response = requests.post(url_transferencias, json=transferencia, timeout=1)
+            except Exception as e:
+                print("", e)
+        else:
+            print("Dinheiro insuficiente!")
+            input("Precione enter para continuar! ")
 
 def main():
     while True:
