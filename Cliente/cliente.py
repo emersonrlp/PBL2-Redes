@@ -64,8 +64,8 @@ def criar_conta():
         print("", e)
 
 def gerar_timestamp_id():
-    numeros = [str(random.randint(0, 9)) for _ in range(5)]
-    ip_aleatorio = ''.join(numeros) + ip_local[12]
+    numeros = str(random.randint(10000, 99999))
+    ip_aleatorio = numeros+ ip_local[12]
     return ip_aleatorio
 
 def validar_nome(nome):
@@ -193,23 +193,18 @@ def opcoes(id):
         chave = input("Chave pix: ")
         while chave.isdigit() == False or len(chave) != 6:
             chave = input("Chave pix: ")
-        url_transferencias = f"http://192.168.1.10{chave[5]}:8081/transferencias"
+        url_transferencias = f"http://192.168.1.10{chave[5]}:8081/transferir"
 
         valor = input("valor: ")
         while valor.isdigit() == False:
             valor = input("valor: ")
         valor = int(valor)
         
-        conta = obter_conta(id)
-        if conta["Saldo"] >= valor:
-            transferencia = {"id": int(chave), "Valor": valor, "id_remetente": str(id)}
-            try:
-                response = requests.post(url_transferencias, json=transferencia, timeout=1)
-            except Exception as e:
-                print("", e)
-        else:
-            print("Dinheiro insuficiente!")
-            input("Precione enter para continuar! ")
+        transferencia = {"id_destino": int(chave), "Valor": valor, "id_origem": id}
+        try:
+            response = requests.post(url_transferencias, json=transferencia, timeout=1)
+        except Exception as e:
+            print("", e)
 
 def main():
     while True:

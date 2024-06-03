@@ -8,7 +8,7 @@ contas = []
 
 # Rotas para sensores
 @app.route('/contas', methods=['GET'])
-def get_clientes():
+def get_contas():
     return jsonify(contas)
 
 @app.route('/contas/<int:conta_id>', methods=['GET'])
@@ -44,7 +44,10 @@ def criar_saque():
     novo_saque = request.get_json()
     for item in contas:
         if item["id"] == novo_saque["id"]:
-            item["Saldo"] = item["Saldo"] - novo_saque["Valor"]
+            if item["Saldo"] >= novo_saque["Valor"]:
+                item["Saldo"] = item["Saldo"] - novo_saque["Valor"]
+            else:
+                print("Saldo insuficiente! ")
     return jsonify(novo_saque), 201
 
 @app.route('/depositos', methods=['POST'])
@@ -55,21 +58,56 @@ def criar_depositos():
             item["Saldo"] = item["Saldo"] + novo_deposito["Valor"]
     return jsonify(novo_deposito), 201
 
-@app.route('/transferencias', methods=['POST'])
-def criar_transferencia():
-    nova_transferencia = request.get_json()
+@app.route('/receber', methods=['POST'])
+def receber_transferencia():
+    transferencia = request.get_json()
     for item in contas:
-        if item["id"] == nova_transferencia["id"]:
-            item["Saldo"] = item["Saldo"] + nova_transferencia["Valor"]
-            saque = {"id": int(nova_transferencia["id_remetente"]), "Valor": nova_transferencia["Valor"]}
-            try:
-                # Enviar uma solicitação POST para a API Flask para criar depositar
-                url_saques = f"http://192.168.1.10{nova_transferencia["id_remetente"][5]}:8081/saques"
-                response = requests.post(url_saques, json=saque, timeout=1)
-            except Exception as e:
-                print("", e)
-    return jsonify(nova_transferencia), 201
+        if item["id"] == transferencia["id"]:
+            item['Saldo'] += transferencia['Valor']
+            return jsonify(transferencia), 201
+    return jsonify({'message': 'Conta não encontrada'}), 404
 
+@app.route('/transferir', methods=['POST'])
+def fazer_transferencia():
+    nova_transferencia = request.get_json()
+    url_destino = f"http://192.168.1.10{str(nova_transferencia["id_origem"])[5]}:8081/receber"
+
+    for item in contas:
+        if item["id"] == nova_transferencia["id_origem"]:
+            if item["Saldo"] < nova_transferencia["Valor"]:
+                return jsonify({'message': 'Saldo insuficiente na conta de origem'}), 400
+            
+            try:
+                # Deduz o saldo do remetente localmente
+                for item in contas:
+                    if item["id"] == int(nova_transferencia["id_origem"]):
+                        item["Saldo"] -= nova_transferencia["Valor"]
+                
+                # Enviar solicitação para adicionar saldo ao destinatário
+                transferencia = {
+                    "id": nova_transferencia['id_destino'],
+                    "Valor": nova_transferencia['Valor']
+                }
+
+                response = requests.post(url_destino, json=transferencia, timeout=1)
+
+                if response.status_code != 201:
+                    # Reverter dedução em caso de exceção
+                    for item in contas:
+                        if item["id"] == int(nova_transferencia["id_origem"]):
+                            item['Saldo'] += nova_transferencia['Valor']
+                    return jsonify({'message': 'Erro ao realizar transferência'}), 500
+                elif response.status_code == 201:
+                    return "", 201
+                
+            except Exception as e:
+                # Reverter dedução em caso de exceção
+                for item in contas:
+                    if item["id"] == int(nova_transferencia["id_origem"]):
+                        item['Saldo'] += nova_transferencia['Valor']
+                return jsonify({'message': 'Erro ao realizar transferência'}), 500
+            
+    
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8081, debug=True)
 
