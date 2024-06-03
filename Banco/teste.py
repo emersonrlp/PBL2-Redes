@@ -82,7 +82,7 @@ def receber_transferencia():
 def fazer_transferencia():
         nova_transferencia = request.get_json()
         url_destino = f"http://192.168.1.10{str(nova_transferencia["id_destino"])[5]}:8081/receber"
-
+        print(url_destino)
         with lock:
             for item in contas:
                 if item["id"] == nova_transferencia["id_origem"]:
