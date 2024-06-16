@@ -1,330 +1,197 @@
-from flask import Flask, jsonify, request
-import threading
+from flask import Flask, request, jsonify
 import requests
+import threading
+import time
+import socket
 
 app = Flask(__name__)
 
-# Estrutura de dados para armazenar clientes e suas contas
-clientes = []
-lock = threading.Lock()
+# Configurações da rede - altere estes IPs para os IPs das suas máquinas
+ips = ["http://192.168.1.106:5000", "http://192.168.1.105:5000"]
+current_ip_index = 0
 
-# Função auxiliar para encontrar um cliente por ID
-def find_cliente(cliente_id):
-    return next((cliente for cliente in clientes if cliente['id'] == cliente_id), None)
+# Variável global para indicar se a máquina tem o token
+has_token = False
+token_sequence = 0  # Sequência do token
+token_timeout = 15  # Tempo máximo de espera para o token em segundos
 
-# Função auxiliar para encontrar uma conta por ID dentro de um cliente
-def find_conta(cliente, conta_id):
-    return next((conta for conta in cliente['contas'] if conta['id'] == conta_id), None)
-
-# Rotas para clientes
-@app.route('/clientes', methods=['GET'])
-def get_clientes():
-    with lock:
-        clientes_sem_senha = [cliente.copy() for cliente in clientes]
-        for cliente in clientes_sem_senha:
-            del cliente['senha']
-        return jsonify(clientes_sem_senha)
-
-@app.route('/clientes/<int:cliente_id>', methods=['GET'])
-def get_cliente(cliente_id):
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente:
-            cliente_sem_senha = cliente.copy()
-            del cliente_sem_senha['senha']
-            return jsonify(cliente_sem_senha)
-        return jsonify({'message': 'Cliente não encontrado'}), 404
-
-@app.route('/clientes', methods=['POST'])
-def criar_cliente():
-    novo_cliente = request.json
-    required_fields = ['id', 'nome', 'idade', 'senha']
+@app.route('/token', methods=['POST'])
+def receive_token():
+    global has_token, token_sequence
+    data = request.get_json()
+    received_sequence = data.get('sequence', -1)
     
-    for field in required_fields:
-        if field not in novo_cliente:
-            return jsonify({'message': f'Campo obrigatório {field} está faltando'}), 400
+    #if received_sequence > token_sequence: estava assim, mas dava erro
+    if received_sequence >= token_sequence:
+        token_sequence = received_sequence
+        has_token = True
+        print(f"Recebi o token com sequência {token_sequence}")
+        return jsonify({"status": "ok"})
+    else:
+        print(f"Token com sequência inválida recebido: {received_sequence}")
+        return jsonify({"status": "invalid sequence"}), 400
 
-    with lock:
-        if find_cliente(novo_cliente['id']):
-            return jsonify({'message': 'Cliente com este ID já existe'}), 400
-        novo_cliente['contas'] = []
-        clientes.append(novo_cliente)
-        cliente_sem_senha = novo_cliente.copy()
-        del cliente_sem_senha['senha']
-        return jsonify(cliente_sem_senha), 201
+@app.route('/process', methods=['POST'])
+def process_request():
+    global has_token
+    data = request.get_json()
+    if has_token:
+        # Processar dados aqui
+        print("Processando dados:", data)
+        # Simular processamento
+        time.sleep(5)
+        has_token = False
+        pass_token()
+        return jsonify({"status": "processed"})
+    else:
+        return jsonify({"status": "no_token"}), 403
 
-@app.route('/clientes/<int:cliente_id>', methods=['DELETE'])
-def excluir_cliente(cliente_id):
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente:
-            clientes.remove(cliente)
-            return jsonify({'message': 'Cliente excluído com sucesso'})
-        return jsonify({'message': 'Cliente não encontrado'}), 404
+@app.route('/check_token', methods=['GET'])
+def check_token():
+    global has_token, token_sequence
+    return jsonify({"has_token": has_token, "sequence": token_sequence})
 
-# Rotas para contas dentro de um cliente específico
-@app.route('/clientes/<int:cliente_id>/contas', methods=['GET'])
-def get_contas(cliente_id):
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente:
-            return jsonify(cliente['contas'])
-        return jsonify({'message': 'Cliente não encontrado'}), 404
+def pass_token():
+    global current_ip_index, token_sequence
+    attempts = 0
+    total_ips = len(ips)
+    original_index = current_ip_index
 
-@app.route('/clientes/<int:cliente_id>/contas/<int:conta_id>', methods=['GET'])
-def get_conta(cliente_id, conta_id):
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente:
-            conta = find_conta(cliente, conta_id)
-            if conta:
-                return jsonify(conta)
-            return jsonify({'message': 'Conta não encontrada'}), 404
-        return jsonify({'message': 'Cliente não encontrado'}), 404
-
-@app.route('/clientes/<int:cliente_id>/contas', methods=['POST'])
-def criar_conta(cliente_id):
-    nova_conta = request.json
-    required_fields = ['id', 'saldo']
-    
-    for field in required_fields:
-        if field not in nova_conta:
-            return jsonify({'message': f'Campo obrigatório {field} está faltando'}), 400
-
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente:
-            if find_conta(cliente, nova_conta['id']):
-                return jsonify({'message': 'Conta com este ID já existe para o cliente'}), 400
-            cliente['contas'].append(nova_conta)
-            return jsonify(nova_conta), 201
-        return jsonify({'message': 'Cliente não encontrado'}), 404
-
-@app.route('/clientes/<int:cliente_id>/contas/<int:conta_id>', methods=['PUT'])
-def atualizar_conta(cliente_id, conta_id):
-    dados_atualizados = request.json
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente:
-            conta = find_conta(cliente, conta_id)
-            if conta:
-                conta.update(dados_atualizados)
-                return jsonify(conta)
-            return jsonify({'message': 'Conta não encontrada'}), 404
-        return jsonify({'message': 'Cliente não encontrado'}), 404
-
-@app.route('/clientes/<int:cliente_id>/contas/<int:conta_id>', methods=['DELETE'])
-def excluir_conta(cliente_id, conta_id):
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente:
-            cliente['contas'] = [conta for conta in cliente['contas'] if conta['id'] != conta_id]
-            return jsonify({'message': 'Conta excluída com sucesso'})
-        return jsonify({'message': 'Cliente não encontrado'}), 404
-
-# Endpoint para depositar em uma conta
-@app.route('/clientes/<int:cliente_id>/contas/<int:conta_id>/depositar', methods=['POST'])
-def depositar(cliente_id, conta_id):
-    valor_deposito = request.json.get('valor')
-    
-    if valor_deposito is None:
-        return jsonify({'message': 'Campo obrigatório valor está faltando'}), 400
-
-    if valor_deposito <= 0:
-        return jsonify({'message': 'Valor de depósito deve ser maior que zero'}), 400
-
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente:
-            conta = find_conta(cliente, conta_id)
-            if conta:
-                conta['saldo'] += valor_deposito
-                return jsonify(conta)
-            return jsonify({'message': 'Conta não encontrada'}), 404
-        return jsonify({'message': 'Cliente não encontrado'}), 404
-
-# Endpoint para depositar em uma conta
-@app.route('/clientes/<int:cliente_id>/contas/<int:conta_id>/sacar', methods=['POST'])
-def sacar(cliente_id, conta_id):
-    valor_saque = request.json.get('valor')
-    
-    if valor_saque is None:
-        return jsonify({'message': 'Campo obrigatório valor está faltando'}), 400
-
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente:
-            conta = find_conta(cliente, conta_id)
-            if conta:
-                if conta['saldo'] >= valor_saque:
-                    conta['saldo'] -= valor_saque
-                    return jsonify(conta)
-                else:
-                    return jsonify({'message': 'Saldo insuficiente'}), 404
-            return jsonify({'message': 'Conta não encontrada'}), 404
-        return jsonify({'message': 'Cliente não encontrado'}), 404
-    
-# Endpoint para login
-@app.route('/login', methods=['POST'])
-def login():
-    dados_login = request.json
-    cliente_id = dados_login.get('id')
-    senha = dados_login.get('senha')
-
-    if not cliente_id or not senha:
-        return jsonify({'message': 'ID e senha são obrigatórios'}), 400
-
-    with lock:
-        cliente = find_cliente(cliente_id)
-        if cliente and cliente['senha'] == senha:
-            cliente_sem_senha = cliente.copy()
-            del cliente_sem_senha['senha']
-            return jsonify({'message': 'Login bem-sucedido', 'cliente': cliente_sem_senha})
-        return jsonify({'message': 'ID ou senha incorretos'}), 401
-
-"""@app.route('/confirmar', methods=['POST'])
-def confirmar_transferencia():
-    with lock:
-        transferencia = request.get_json()
-        transferencia["status"] = "confirmado"
-        return jsonify({'message': 'Transferencia confirmada'}), 201"""
-
-# aqui preparo od dados para a transferencia e enviou se pode ou não ser feito 
-@app.route('/receber', methods=['POST'])
-def receber_transferencia():
-    with lock:
-        transferencia = request.get_json()
-        for item in clientes:
-            if item["id"] == transferencia["id"]:
-                item['contas'][0]["saldo"] += transferencia['valor']
-                transferencia["status"] = "preparado"
-                return jsonify(transferencia), 201
-        transferencia["status"] = "abortado"
-        return jsonify(transferencia), 404
-
-# aqui reverto a transferencia
-@app.route('/reverter', methods=['POST'])
-def reverter_transferencia():
-    with lock:
-        transferencia = request.get_json()
-        for item in clientes:
-            if item["id"] == transferencia["id"]:
-                item['contas'][0]["saldo"] -= transferencia['valor']
-                transferencia["status"] = "revertido"
-                return jsonify(transferencia), 201
-        return jsonify(transferencia), 404
-
-
-@app.route('/preparar', methods=['POST'])
-def preparar_transferencia():
-    nova_transferencia = request.get_json()
-    for item in clientes:
-        if item["id"] == nova_transferencia["id_origem"]:
-            if item["contas"][0]["saldo"] < nova_transferencia["valor"]:
-                nova_transferencia["status"] = "abortado"
-                return jsonify(nova_transferencia), 400
-
-    with lock:
-        # Deduz o saldo do remetente localmente
-        for item in clientes:
-            if item["id"] == int(nova_transferencia["id_origem"]):
-                item["contas"][0]["saldo"] -= nova_transferencia["valor"]
-                nova_transferencia["status"] = "preparado"
-                return jsonify(nova_transferencia), 201
-            
-@app.route('/transferir', methods=['POST'])
-def fazer_transferencia():
-    transferencias = request.get_json()
-    lista_destino = []
-    lista_origem = []
-
-    for nova_transferencia in transferencias:
-        url_destino = f"http://192.168.1.10{str(nova_transferencia["id_destino"])[5]}:8081/receber"
-           
+    while attempts < total_ips - 1:  # Tentar todos os IPs exceto o atual
+        next_ip_index = (current_ip_index + 1) % total_ips
+        if next_ip_index == original_index:
+            current_ip_index = next_ip_index
+            attempts += 1
+            continue
+        next_ip = ips[next_ip_index]
+        print(f"Passando o token para {next_ip}")
         try:
-            url_origem = f"http://192.168.1.10{str(nova_transferencia["id_origem"])[5]}:8081/preparar"
-            response = requests.post(url_origem, json=nova_transferencia, timeout=1)
-            
-            while response.status_code != 201:
-                # Reverter dedução em caso de exceção
-                for item in lista_destino:
-                    if item["status"] == "preparado":
-                        # Reverter dedução em caso de exceção
-                        url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                        response = requests.post(url_destino, json=item, timeout=1)
-                        while response.status_code != 201:
-                            url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                            response = requests.post(url_destino, json=item, timeout=1)
-                for item in lista_origem:
-                    if item["status"] == "preparado":
-                        # Reverter dedução em caso de exceção
-                        url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                        response = requests.post(url_destino, json=item, timeout=1)
-                        while response.status_code != 201:
-                            url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                            response = requests.post(url_destino, json=item, timeout=1)
-                return jsonify({'message': 'Erro ao realizar transferência'}), 500
-
-            transferencia = {
-                "id": nova_transferencia['id_origem'],
-                "valor": -(nova_transferencia['valor']),
-                "status": response.json()["status"]
-            } 
-            lista_origem.append(transferencia)
-
-            # Enviar solicitação para adicionar saldo ao destinatário
-            transferencia = {
-                "id": nova_transferencia['id_destino'],
-                "valor": nova_transferencia['valor'],
-                "status": "default"
-            }
-
-            response = requests.post(url_destino, json=transferencia, timeout=1)
-
-            if response.status_code != 201: 
-                # Reverter dedução em caso de exceção
-                for item in lista_destino:
-                    if item["status"] == "preparado":
-                        # Reverter dedução em caso de exceção
-                        url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                        response = requests.post(url_destino, json=item, timeout=1)
-                        while response.status_code != 201:
-                            url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                            response = requests.post(url_destino, json=item, timeout=1)
-                for item in lista_origem:
-                    if item["status"] == "preparado":
-                        # Reverter dedução em caso de exceção
-                        url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                        response = requests.post(url_destino, json=item, timeout=1)
-                        while response.status_code != 201:
-                            url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                            response = requests.post(url_destino, json=item, timeout=1)
-                return jsonify({'message': 'Erro ao realizar transferência'}), 500
+            # Incrementa a sequência do token
+            token_sequence += 1
+            # Timeout adicionado para evitar espera infinita
+            response = requests.post(f"{next_ip}/token", json={"sequence": token_sequence}, timeout=5)
+            if response.status_code == 200:
+                current_ip_index = next_ip_index
+                print(f"Token passado para {next_ip}")
+                return
             else:
-                transferencia["status"] = "preparado"
-                lista_destino.append(transferencia)            
-                
-        except Exception as e:
-            with lock:
-                # Reverter dedução em caso de exceção
-                for item in lista_destino:
-                    if item["status"] == "preparado":
-                        # Reverter dedução em caso de exceção
-                        url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                        response = requests.post(url_destino, json=item, timeout=1)
-                        while response.status_code != 201:
-                            url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                            response = requests.post(url_destino, json=item, timeout=1)
-                for item in lista_origem:
-                    if item["status"] == "preparado":
-                        # Reverter dedução em caso de exceção
-                        url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                        response = requests.post(url_destino, json=item, timeout=1)
-                        while response.status_code != 201:
-                            url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
-                            response = requests.post(url_destino, json=item, timeout=1)
-                return jsonify({'message': 'Erro ao realizar transferência'}), 500
-    return jsonify({'message': 'Transferencia realizada'}), 201
+                print(f"Erro ao passar o token para {next_ip}")
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao conectar com {next_ip}: {e}")
+        current_ip_index = next_ip_index
+        attempts += 1
+    
+    # Se todas as tentativas falharem, tenta passar o token de volta para a máquina original
+    print(f"Tentando passar o token de volta para {ips[original_index]}")
+    try:
+        token_sequence += 1
+        response = requests.post(f"{ips[original_index]}/token", json={"sequence": token_sequence}, timeout=5)
+        if response.status_code == 200:
+            current_ip_index = original_index
+            print(f"Token passado de volta para {ips[original_index]}")
+        else:
+            print(f"Erro ao passar o token de volta para {ips[original_index]}")
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao conectar com {ips[original_index]}: {e}")
+
+def start_server(ip, port):
+    app.run(host=ip, port=port)
+
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Não precisa de uma conexão real
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return ip
+
+def monitor_token():
+    global has_token, token_timeout
+    while True:
+        if has_token:
+            # Reseta o timer se esta máquina tem o token
+            last_token_time = time.time()
+            while has_token:
+                time.sleep(1)
+            token_passed_time = time.time()
+            if token_passed_time - last_token_time > token_timeout:
+                print("Timeout do token excedido. Reeleição do token.")
+                reelect_token()
+        time.sleep(5)
+
+def reelect_token():
+    global current_ip_index, token_sequence
+    # Escolhe o próximo IP na lista como o novo detentor do token
+    next_ip_index = (current_ip_index + 1) % len(ips)
+    next_ip = ips[next_ip_index]
+    print(f"Tentando reeleger token para {next_ip} com sequência {token_sequence + 1}")
+    try:
+        token_sequence += 1
+        response = requests.post(f"{next_ip}/token", json={"sequence": token_sequence}, timeout=5)
+        if response.status_code == 200:
+            current_ip_index = next_ip_index
+            print(f"Token reeleito para {next_ip}")
+        else:
+            print(f"Erro ao reeleger token para {next_ip}")
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao conectar com {next_ip}: {e}")
+
+def check_network_for_token():
+    global token_sequence
+    highest_sequence = token_sequence
+    for ip in ips:
+        try:
+            response = requests.get(f"{ip}/check_token", timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("has_token") and data.get("sequence", -1) > highest_sequence:
+                    highest_sequence = data.get("sequence", -1)
+                    return True
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao conectar com {ip}: {e}")
+    return False
+
+def verifica_token():
+    global has_token
+    while True:
+        if has_token:
+            # Simular recebimento de uma requisição de processamento
+            print("Máquina com token. Pronta para processar.")
+            time.sleep(10)  # Tempo de espera para simular processamento
+            has_token = False
+            pass_token()
+        else:
+            print("Aguardando token...")
+            # Checa se outra máquina tem o token para resolver problemas de reconexão
+            if not check_network_for_token():
+                print("Nenhuma máquina com token detectada. Reeleição do token.")
+                reelect_token()
+            time.sleep(5)
+
+#Funcao para inicializar o token 
+def init():
+    global token_sequence, has_token
+    ip = get_local_ip()
+
+    if f"http://{ip}:5000" == ips[0]:
+        has_token = True  # A primeira máquina começa com o token
+        token_sequence = 0
+
+def main():
+    ip = get_local_ip()
+    port = 5000  # Porta fixa
+
+    init()
+
+    server_thread = threading.Thread(target=start_server, args=(ip, port))
+    server_thread.start()
+
+    monitor_thread = threading.Thread(target=monitor_token)
+    monitor_thread.start()
+
+    verifica_token()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8081, debug=True)
+    main()

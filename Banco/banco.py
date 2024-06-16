@@ -1,4 +1,4 @@
-from nova_api import app
+from api import app
 
 def main():
     try:

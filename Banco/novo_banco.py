@@ -1,12 +1,18 @@
-from nova_api import app
+from nova_api import *
 
 def main():
-    try:
-        # Inicia a aplicação Flask
-        app.run(host='0.0.0.0', port=8081, debug=True, threaded=True)
+    ip = get_local_ip()
+    port = 5000  # Porta fixa
 
-    except Exception as e:
-        print('Erro:', e)
+    init()
 
+    server_thread = threading.Thread(target=start_server, args=(ip, port))
+    server_thread.start()
+
+    monitor_thread = threading.Thread(target=monitor_token)
+    monitor_thread.start()
+
+    verifica_token()
+    
 if __name__ == "__main__":
     main()

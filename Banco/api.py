@@ -182,6 +182,14 @@ def login():
             return jsonify({'message': 'Login bem-sucedido', 'cliente': cliente_sem_senha})
         return jsonify({'message': 'ID ou senha incorretos'}), 401
 
+"""@app.route('/confirmar', methods=['POST'])
+def confirmar_transferencia():
+    with lock:
+        transferencia = request.get_json()
+        transferencia["status"] = "confirmado"
+        return jsonify({'message': 'Transferencia confirmada'}), 201"""
+
+# aqui preparo od dados para a transferencia e enviou se pode ou não ser feito 
 @app.route('/receber', methods=['POST'])
 def receber_transferencia():
     with lock:
@@ -189,52 +197,134 @@ def receber_transferencia():
         for item in clientes:
             if item["id"] == transferencia["id"]:
                 item['contas'][0]["saldo"] += transferencia['valor']
+                transferencia["status"] = "preparado"
                 return jsonify(transferencia), 201
-        return jsonify({'message': 'Conta não encontrada'}), 404
+        transferencia["status"] = "abortado"
+        return jsonify(transferencia), 404
 
+# aqui reverto a transferencia
+@app.route('/reverter', methods=['POST'])
+def reverter_transferencia():
+    with lock:
+        transferencia = request.get_json()
+        for item in clientes:
+            if item["id"] == transferencia["id"]:
+                item['contas'][0]["saldo"] -= transferencia['valor']
+                transferencia["status"] = "revertido"
+                return jsonify(transferencia), 201
+        return jsonify(transferencia), 404
+
+
+@app.route('/preparar', methods=['POST'])
+def preparar_transferencia():
+    nova_transferencia = request.get_json()
+    for item in clientes:
+        if item["id"] == nova_transferencia["id_origem"]:
+            if item["contas"][0]["saldo"] < nova_transferencia["valor"]:
+                nova_transferencia["status"] = "abortado"
+                return jsonify(nova_transferencia), 400
+
+    with lock:
+        # Deduz o saldo do remetente localmente
+        for item in clientes:
+            if item["id"] == int(nova_transferencia["id_origem"]):
+                item["contas"][0]["saldo"] -= nova_transferencia["valor"]
+                nova_transferencia["status"] = "preparado"
+                return jsonify(nova_transferencia), 201
+            
 @app.route('/transferir', methods=['POST'])
 def fazer_transferencia():
-        nova_transferencia = request.get_json()
-        url_destino = f"http://192.168.1.10{str(nova_transferencia["id_destino"])[5]}:8081/receber"
+    transferencias = request.get_json()
+    lista_destino = []
+    lista_origem = []
 
-        with lock:
-            for item in clientes:
-                if item["id"] == nova_transferencia["id_origem"]:
-                    if item["contas"][0]["saldo"] < nova_transferencia["valor"]:
-                        return jsonify({'message': 'Saldo insuficiente na conta de origem'}), 400
-                
+    for nova_transferencia in transferencias:
+        url_destino = f"http://192.168.1.10{str(nova_transferencia["id_destino"])[5]}:8081/receber"
+           
         try:
-            with lock:
-                # Deduz o saldo do remetente localmente
-                for item in clientes:
-                    if item["id"] == int(nova_transferencia["id_origem"]):
-                        item["contas"][0]["saldo"] -= nova_transferencia["valor"]
+            url_origem = f"http://192.168.1.10{str(nova_transferencia["id_origem"])[5]}:8081/preparar"
+            response = requests.post(url_origem, json=nova_transferencia, timeout=1)
             
+            while response.status_code != 201:
+                # Reverter dedução em caso de exceção
+                for item in lista_destino:
+                    if item["status"] == "preparado":
+                        # Reverter dedução em caso de exceção
+                        url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        response = requests.post(url_destino, json=item, timeout=1)
+                        while response.status_code != 201:
+                            url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            response = requests.post(url_destino, json=item, timeout=1)
+                for item in lista_origem:
+                    if item["status"] == "preparado":
+                        # Reverter dedução em caso de exceção
+                        url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        response = requests.post(url_destino, json=item, timeout=1)
+                        while response.status_code != 201:
+                            url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            response = requests.post(url_destino, json=item, timeout=1)
+                return jsonify({'message': 'Erro ao realizar transferência'}), 500
+
+            transferencia = {
+                "id": nova_transferencia['id_origem'],
+                "valor": -(nova_transferencia['valor']),
+                "status": response.json()["status"]
+            } 
+            lista_origem.append(transferencia)
+
             # Enviar solicitação para adicionar saldo ao destinatário
             transferencia = {
                 "id": nova_transferencia['id_destino'],
-                "valor": nova_transferencia['valor']
+                "valor": nova_transferencia['valor'],
+                "status": "default"
             }
 
             response = requests.post(url_destino, json=transferencia, timeout=1)
 
-            if response.status_code != 201:
-                with lock:
-                    # Reverter dedução em caso de exceção
-                    for item in clientes:
-                        if item["id"] == int(nova_transferencia["id_origem"]):
-                            item['Saldo'][0]["saldo"] += nova_transferencia['valor']
-                    return jsonify({'message': 'Erro ao realizar transferência'}), 500
-            elif response.status_code == 201:
-                return "", 201
-                    
+            if response.status_code != 201: 
+                # Reverter dedução em caso de exceção
+                for item in lista_destino:
+                    if item["status"] == "preparado":
+                        # Reverter dedução em caso de exceção
+                        url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        response = requests.post(url_destino, json=item, timeout=1)
+                        while response.status_code != 201:
+                            url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            response = requests.post(url_destino, json=item, timeout=1)
+                for item in lista_origem:
+                    if item["status"] == "preparado":
+                        # Reverter dedução em caso de exceção
+                        url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        response = requests.post(url_destino, json=item, timeout=1)
+                        while response.status_code != 201:
+                            url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            response = requests.post(url_destino, json=item, timeout=1)
+                return jsonify({'message': 'Erro ao realizar transferência'}), 500
+            else:
+                transferencia["status"] = "preparado"
+                lista_destino.append(transferencia)            
+                
         except Exception as e:
             with lock:
                 # Reverter dedução em caso de exceção
-                for item in clientes:
-                    if item["id"] == int(nova_transferencia["id_origem"]):
-                        item['contas'][0]["saldo"] += nova_transferencia['valor']
+                for item in lista_destino:
+                    if item["status"] == "preparado":
+                        # Reverter dedução em caso de exceção
+                        url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        response = requests.post(url_destino, json=item, timeout=1)
+                        while response.status_code != 201:
+                            url_destino = url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            response = requests.post(url_destino, json=item, timeout=1)
+                for item in lista_origem:
+                    if item["status"] == "preparado":
+                        # Reverter dedução em caso de exceção
+                        url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        response = requests.post(url_destino, json=item, timeout=1)
+                        while response.status_code != 201:
+                            url_origem = url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            response = requests.post(url_destino, json=item, timeout=1)
                 return jsonify({'message': 'Erro ao realizar transferência'}), 500
+    return jsonify({'message': 'Transferencia realizada'}), 201
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8081, debug=True)
