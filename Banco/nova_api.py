@@ -13,7 +13,7 @@ current_ip_index = 0
 # Variável global para indicar se a máquina tem o token
 has_token = False
 token_sequence = 0  # Sequência do token
-token_timeout = 15  # Tempo máximo de espera para o token em segundos
+token_timeout = 30  # Tempo máximo de espera para o token em segundos
 
 @app.route('/token', methods=['POST'])
 def receive_token():
@@ -110,21 +110,21 @@ def get_local_ip():
 def monitor_token():
     global has_token, token_timeout
     while True:
-        if has_token:
+        if not has_token:
             # Reseta o timer se esta máquina tem o token
             last_token_time = time.time()
-            while has_token:
+            while not has_token:
                 time.sleep(1)
-            token_passed_time = time.time()
-            if token_passed_time - last_token_time > token_timeout:
-                print("Timeout do token excedido. Reeleição do token.")
-                reelect_token()
-        time.sleep(5)
+                token_passed_time = time.time()
+                if (token_passed_time - last_token_time) > token_timeout:
+                    print("Timeout do token excedido. Reeleição do token.")
+                    reelect_token()
+                    break
 
 def reelect_token():
     global current_ip_index, token_sequence
-    # Escolhe o próximo IP na lista como o novo detentor do token
-    next_ip_index = (current_ip_index + 1) % len(ips)
+    # Escolhe o IP dele na lista como o novo detentor do token
+    next_ip_index = current_ip_index
     next_ip = ips[next_ip_index]
     print(f"Tentando reeleger token para {next_ip} com sequência {token_sequence + 1}")
     try:
@@ -165,9 +165,9 @@ def verifica_token():
         else:
             print("Aguardando token...")
             # Checa se outra máquina tem o token para resolver problemas de reconexão
-            if not check_network_for_token():
+            '''if not check_network_for_token():
                 print("Nenhuma máquina com token detectada. Reeleição do token.")
-                reelect_token()
+                reelect_token()'''
             time.sleep(5)
 
 #Funcao para inicializar o token 
