@@ -2,196 +2,130 @@ from flask import Flask, request, jsonify
 import requests
 import threading
 import time
-import socket
 
 app = Flask(__name__)
 
-# Configurações da rede - altere estes IPs para os IPs das suas máquinas
+# Configurações de rede - altere esses IPs para os IPs das suas duas máquinas
 ips = ["http://192.168.1.106:5000", "http://192.168.1.105:5000"]
-current_ip_index = 0
+indice_ip_atual = 0
+ip = "192.168.1.106"
 
-# Variável global para indicar se a máquina tem o token
-has_token = False
-token_sequence = 0  # Sequência do token
-token_timeout = 30  # Tempo máximo de espera para o token em segundos
+# Variável global para indicar se a máquina possui o token
+tem_token = False
+sequencia_token = 0  # Sequência do token
+timeout_token = 30  # Tempo máximo de espera pelo token em segundos
 
 @app.route('/token', methods=['POST'])
-def receive_token():
-    global has_token, token_sequence
-    data = request.get_json()
-    received_sequence = data.get('sequence', -1)
+def receber_token():
+    global tem_token, sequencia_token
+    dados = request.get_json()
+    sequencia_recebida = dados.get('sequencia', -1)
     
-    #if received_sequence > token_sequence: estava assim, mas dava erro
-    if received_sequence >= token_sequence:
-        token_sequence = received_sequence
-        has_token = True
-        print(f"Recebi o token com sequência {token_sequence}")
+    if sequencia_recebida > sequencia_token:
+        sequencia_token = sequencia_recebida
+        tem_token = True
+        print(f"Recebeu token com sequência {sequencia_token}")
         return jsonify({"status": "ok"})
     else:
-        print(f"Token com sequência inválida recebido: {received_sequence}")
-        return jsonify({"status": "invalid sequence"}), 400
+        #print(f"Sequência de token inválida recebida: {sequencia_recebida}")
+        return jsonify({"status": "sequência inválida"}), 400
 
-@app.route('/process', methods=['POST'])
-def process_request():
-    global has_token
-    data = request.get_json()
-    if has_token:
+@app.route('/processar', methods=['POST'])
+def processar_requisicao():
+    global tem_token
+    dados = request.get_json()
+    if tem_token:
         # Processar dados aqui
-        print("Processando dados:", data)
+        print("Processando dados:", dados)
         # Simular processamento
         time.sleep(5)
-        has_token = False
-        pass_token()
-        return jsonify({"status": "processed"})
+        tem_token = False
+        passar_token()
+        return jsonify({"status": "processado"})
     else:
-        return jsonify({"status": "no_token"}), 403
+        return jsonify({"status": "sem_token"}), 403
 
-@app.route('/check_token', methods=['GET'])
-def check_token():
-    global has_token, token_sequence
-    return jsonify({"has_token": has_token, "sequence": token_sequence})
+@app.route('/verificar_token', methods=['GET'])
+def verificar_token():
+    global tem_token, sequencia_token
+    return jsonify({"tem_token": tem_token, "sequencia": sequencia_token})
 
-def pass_token():
-    global current_ip_index, token_sequence
-    attempts = 0
-    total_ips = len(ips)
-    original_index = current_ip_index
+def passar_token():
+    global indice_ip_atual, sequencia_token, ips, tem_token, ip
+    conseguiu = False
+    for i in range(len(ips)):
+        if ips[i] != ips[indice_ip_atual]:
+            try:
+                resposta = requests.post(f"{ips[i]}/token", json={"sequencia": sequencia_token + 1}, timeout=5)
+                if resposta.status_code == 200:
+                    conseguiu = True
+                    print(f"Token passado para {ips[i]}")
+                    break
+                else:
+                    print(f"Erro ao passar Token para {ips[i]}") 
+            except requests.exceptions.RequestException as e:
+                print(f"Erro ao conectar a {ips[i]}: {e}")
+                pass
+    if conseguiu == False:
+        tem_token = True
+        sequencia_token +=1
+        
+def iniciar_servidor(ip, porta):
+    app.run(host=ip, port=porta)
 
-    while attempts < total_ips - 1:  # Tentar todos os IPs exceto o atual
-        next_ip_index = (current_ip_index + 1) % total_ips
-        if next_ip_index == original_index:
-            current_ip_index = next_ip_index
-            attempts += 1
-            continue
-        next_ip = ips[next_ip_index]
-        print(f"Passando o token para {next_ip}")
-        try:
-            # Incrementa a sequência do token
-            token_sequence += 1
-            # Timeout adicionado para evitar espera infinita
-            response = requests.post(f"{next_ip}/token", json={"sequence": token_sequence}, timeout=5)
-            if response.status_code == 200:
-                current_ip_index = next_ip_index
-                print(f"Token passado para {next_ip}")
-                return
-            else:
-                print(f"Erro ao passar o token para {next_ip}")
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao conectar com {next_ip}: {e}")
-        current_ip_index = next_ip_index
-        attempts += 1
-    
-    # Se todas as tentativas falharem, tenta passar o token de volta para a máquina original
-    print(f"Tentando passar o token de volta para {ips[original_index]}")
-    try:
-        token_sequence += 1
-        response = requests.post(f"{ips[original_index]}/token", json={"sequence": token_sequence}, timeout=5)
-        if response.status_code == 200:
-            current_ip_index = original_index
-            print(f"Token passado de volta para {ips[original_index]}")
-        else:
-            print(f"Erro ao passar o token de volta para {ips[original_index]}")
-    except requests.exceptions.RequestException as e:
-        print(f"Erro ao conectar com {ips[original_index]}: {e}")
-
-def start_server(ip, port):
-    app.run(host=ip, port=port)
-
-def get_local_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        # Não precisa de uma conexão real
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-    finally:
-        s.close()
-    return ip
-
-def monitor_token():
-    global has_token, token_timeout
+def monitorar_token():
+    global tem_token, timeout_token
     while True:
-        if not has_token:
-            # Reseta o timer se esta máquina tem o token
-            last_token_time = time.time()
-            while not has_token:
+        if not tem_token:
+            ultimo_tempo_token = time.time()
+            while not tem_token:
                 time.sleep(1)
-                token_passed_time = time.time()
-                if (token_passed_time - last_token_time) > token_timeout:
-                    print("Timeout do token excedido. Reeleição do token.")
-                    reelect_token()
+                tempo_passado_token = time.time()
+                if (tempo_passado_token - ultimo_tempo_token) > timeout_token:
+                    print("Tempo de espera do token excedido. Reeleição do token.")
+                    reeleger_token()
                     break
 
-def reelect_token():
-    global current_ip_index, token_sequence
-    # Escolhe o IP dele na lista como o novo detentor do token
-    next_ip_index = current_ip_index
-    next_ip = ips[next_ip_index]
-    print(f"Tentando reeleger token para {next_ip} com sequência {token_sequence + 1}")
+def reeleger_token():
+    global indice_ip_atual, sequencia_token
+    proximo_indice_ip = indice_ip_atual
+    proximo_ip = ips[proximo_indice_ip]
+    print(f"Tentando reeleger token para {proximo_ip} com sequência {sequencia_token + 1}")
     try:
-        token_sequence += 1
-        response = requests.post(f"{next_ip}/token", json={"sequence": token_sequence}, timeout=5)
-        if response.status_code == 200:
-            current_ip_index = next_ip_index
-            print(f"Token reeleito para {next_ip}")
+        resposta = requests.post(f"{proximo_ip}/token", json={"sequencia": sequencia_token+1}, timeout=5)
+        if resposta.status_code == 200:
+            indice_ip_atual = proximo_indice_ip
+            print(f"Token reeleito para {proximo_ip}")
         else:
-            print(f"Erro ao reeleger token para {next_ip}")
+            print(f"Erro ao reeleger token para {proximo_ip}")
     except requests.exceptions.RequestException as e:
-        print(f"Erro ao conectar com {next_ip}: {e}")
+        print(f"Erro ao conectar a {proximo_ip}: {e}")
 
-def check_network_for_token():
-    global token_sequence
-    highest_sequence = token_sequence
-    for ip in ips:
-        try:
-            response = requests.get(f"{ip}/check_token", timeout=5)
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("has_token") and data.get("sequence", -1) > highest_sequence:
-                    highest_sequence = data.get("sequence", -1)
-                    return True
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao conectar com {ip}: {e}")
-    return False
-
-def verifica_token():
-    global has_token
-    while True:
-        if has_token:
-            # Simular recebimento de uma requisição de processamento
-            print("Máquina com token. Pronta para processar.")
-            time.sleep(10)  # Tempo de espera para simular processamento
-            has_token = False
-            pass_token()
-        else:
-            print("Aguardando token...")
-            # Checa se outra máquina tem o token para resolver problemas de reconexão
-            '''if not check_network_for_token():
-                print("Nenhuma máquina com token detectada. Reeleição do token.")
-                reelect_token()'''
-            time.sleep(5)
-
-#Funcao para inicializar o token 
-def init():
-    global token_sequence, has_token
-    ip = get_local_ip()
+def iniciar():
+    global sequencia_token, tem_token, ip, ips
 
     if f"http://{ip}:5000" == ips[0]:
-        has_token = True  # A primeira máquina começa com o token
-        token_sequence = 0
+        tem_token = True  # A primeira máquina começa com o token
+        sequencia_token = 0
 
 def main():
-    ip = get_local_ip()
-    port = 5000  # Porta fixa
+    global tem_token, ip
+    porta = 5000  # Porta fixa
 
-    init()
+    iniciar()
 
-    server_thread = threading.Thread(target=start_server, args=(ip, port))
-    server_thread.start()
+    thread_servidor = threading.Thread(target=iniciar_servidor, args=(ip, porta))
+    thread_servidor.start()
 
-    monitor_thread = threading.Thread(target=monitor_token)
-    monitor_thread.start()
+    thread_monitor = threading.Thread(target=monitorar_token)
+    thread_monitor.start()
 
-    verifica_token()
+    while True:
+        if tem_token:
+            # Simular recebimento de uma solicitação de processamento
+            print("Máquina com token. Pronta para processar.")
+            time.sleep(1)
+            passar_token()
 
 if __name__ == "__main__":
     main()
