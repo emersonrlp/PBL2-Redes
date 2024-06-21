@@ -53,7 +53,9 @@ def verificar_token():
 def passar_token():
     global indice_ip_atual, sequencia_token, ips, tem_token, ip
     conseguiu = False
-    for i in range(len(ips)):
+    i = indice_ip_atual
+    while True:
+        i = ((i + 1) % len(ips))
         if ips[i] != ips[indice_ip_atual]:
             try:
                 resposta = requests.post(f"{ips[i]}/token", json={"sequencia": sequencia_token + 1}, timeout=5)
@@ -66,9 +68,10 @@ def passar_token():
             except requests.exceptions.RequestException as e:
                 print(f"Erro ao conectar a {ips[i]}: {e}")
                 pass
-    if conseguiu == False:
-        tem_token = True
-        sequencia_token +=1
+        else:
+            if conseguiu == False:
+                tem_token = True
+                #sequencia_token +=1
         
 def iniciar_servidor(ip, porta):
     app.run(host=ip, port=porta)
