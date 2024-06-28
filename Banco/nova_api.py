@@ -14,6 +14,7 @@ ip = "192.168.1.103"
 tem_token = False
 sequencia_token = 0  # Sequência do token
 timeout_token = 30  # Tempo máximo de espera pelo token em segundos
+conectado = True
 
 # Estrutura de dados para armazenar clientes e suas contas
 clientes = []
@@ -21,6 +22,7 @@ lock = threading.Lock()
 
 # Estrutura de dados para armazenar as transferencias
 transferencias = []
+transferencias_finalizadas = []
 
 # Função auxiliar para encontrar um cliente por ID
 def find_cliente(cliente_id):
@@ -248,9 +250,18 @@ def receber_transferencias():
         print(f"Erro ao receber transferências: {e}")
         return jsonify({'message': 'Erro ao receber transferências'}), 500
 
+# Rota para obter transferências de um usuário específico
+@app.route('/transferencias_finalizadas/usuario/<int:usuario_id>', methods=['GET'])
+def get_transferencias_por_usuario(usuario_id):
+    for i in transferencias_finalizadas:
+        if i[0]["Usuario"] == usuario_id:
+            transferencias_finalizadas.pop(0)
+            return jsonify({'message': 'Transferência realizada'}), 201
+    else:
+        return jsonify({'message': 'Nenhuma transferência encontrada para este usuário'}), 404
+    
 def fazer_transferencia():
     global transferencias
-    print(transferencias)
     lista_destino = []
     lista_origem = []
 
@@ -366,7 +377,7 @@ def verificar_token():
     return jsonify({"tem_token": tem_token, "sequencia": sequencia_token})
 
 def passar_token():
-    global indice_ip_atual, sequencia_token, ips, tem_token, ip
+    global indice_ip_atual, sequencia_token, ips, tem_token, ip, conectado
     conseguiu = False
     i = indice_ip_atual
     while True:
@@ -385,6 +396,7 @@ def passar_token():
                 pass
         else:
             if conseguiu == False:
+                conectado = False
                 tem_token = True
         
 def iniciar_servidor(ip, porta):
@@ -407,19 +419,12 @@ def monitorar_token():
             pass
 
 def reeleger_token():
-    global indice_ip_atual, sequencia_token
-    proximo_indice_ip = indice_ip_atual
-    proximo_ip = ips[proximo_indice_ip]
-    print(f"Tentando reeleger token para {proximo_ip} com sequência {sequencia_token + 1}")
+    global sequencia_token, ips
     try:
-        resposta = requests.post(f"{proximo_ip}/token", json={"sequencia": sequencia_token + 1}, timeout=5)
-        if resposta.status_code == 200:
-            indice_ip_atual = proximo_indice_ip
-            print(f"Token reeleito para {proximo_ip}")
-        else:
-            print(f"Erro ao reeleger token para {proximo_ip}")
-    except requests.exceptions.RequestException as e:
-        print(f"Erro ao conectar a {proximo_ip}: {e}")
+        sequencia_token = sequencia_token + len(ips)
+        passar_token()
+    except:
+        print("Erro ao reeleger token!")
 
 def iniciar():
     global sequencia_token, tem_token, ip, ips
@@ -429,9 +434,9 @@ def iniciar():
         sequencia_token = 0
 
 def processamento():
-    global tem_token, transferencias
+    global tem_token, transferencias, transferencias_finalizadas
     while True:
-        if tem_token:
+        if tem_token == True and conectado == True:
             # Simular recebimento de uma solicitação de processamento
             print("Máquina com token. Pronta para processar.")
             time.sleep(1)
@@ -439,12 +444,18 @@ def processamento():
                 retorno = fazer_transferencia()
                 if retorno == True:
                     print("Transferencia realizada!")
+                    transferencias_finalizadas.append(transferencias[0])
+                    print(transferencias_finalizadas)
                 else:
                     print("Erro ao realizar transferencia!")
                 transferencias.pop(0)
             else:
                 pass
             
+            tem_token = False
+            passar_token()
+            
+        elif tem_token == True and conectado == False:   
             tem_token = False
             passar_token()
 
