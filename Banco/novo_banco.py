@@ -12,7 +12,8 @@ def main():
     thread_monitor = threading.Thread(target=monitorar_token)
     thread_monitor.start()
 
-    processamento()
+    thread_process = threading.Thread(target=processamento)
+    thread_process.start()
     
 if __name__ == "__main__":
     main()
