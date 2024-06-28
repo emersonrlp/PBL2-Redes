@@ -1,18 +1,18 @@
 from nova_api import *
 
 def main():
-    ip = get_local_ip()
-    port = 5000  # Porta fixa
+    global tem_token, ip
+    porta = 8081  # Porta fixa
 
-    init()
+    iniciar()
 
-    server_thread = threading.Thread(target=start_server, args=(ip, port))
-    server_thread.start()
+    thread_servidor = threading.Thread(target=iniciar_servidor, args=(ip, porta))
+    thread_servidor.start()
 
-    monitor_thread = threading.Thread(target=monitor_token)
-    monitor_thread.start()
+    thread_monitor = threading.Thread(target=monitorar_token)
+    thread_monitor.start()
 
-    verifica_token()
+    processamento()
     
 if __name__ == "__main__":
     main()
