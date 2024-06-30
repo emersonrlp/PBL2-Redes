@@ -110,6 +110,7 @@ def criar_conta(cliente_id):
     with lock:
         cliente = find_cliente(cliente_id)
         if cliente:
+            print(cliente, nova_conta["id"])
             if find_conta(cliente, nova_conta['id']):
                 return jsonify({'message': 'Conta com este ID já existe para o cliente'}), 400
             cliente['contas'].append(nova_conta)
@@ -174,7 +175,7 @@ def sacar(cliente_id, conta_id):
             if conta:
                 if conta['saldo'] >= valor_saque:
                     conta['saldo'] -= valor_saque
-                    return jsonify(conta)
+                    return jsonify(conta), 200
                 else:
                     return jsonify({'message': 'Saldo insuficiente'}), 404
             return jsonify({'message': 'Conta não encontrada'}), 404
@@ -251,27 +252,47 @@ def receber_transferencias():
     except Exception as e:
         print(f"Erro ao receber transferências: {e}")
         return jsonify({'message': 'Erro ao receber transferências'}), 500
-
+    
 # Rota para obter transferências de um usuário específico
 @app.route('/transferencias_finalizadas/usuario/<int:usuario_id>', methods=['GET'])
 def get_transferencias_por_usuario(usuario_id):
     for i in transferencias_finalizadas:
-        if i[0]["Usuario"] == usuario_id:
+        if i[0]["Usuario"] == int(usuario_id):
             transferencias_finalizadas.pop(0)
             return jsonify({'message': 'Transferência realizada'}), 201
-    else:
-        return jsonify({'message': 'Nenhuma transferência encontrada para este usuário'}), 404
+    return jsonify({'message': 'Nenhuma transferência encontrada para este usuário'}), 404
     
 def fazer_transferencia():
-    global transferencias
+    global transferencias, ip
     lista_destino = []
     lista_origem = []
 
     for nova_transferencia in transferencias[0]:
-        url_destino = f"http://192.168.1.10{str(nova_transferencia["id_destino"])[5]}:8081/receber"
+        #para ver a ultima parte do ip referente ao id da conta de destino
+        if len(str(nova_transferencia["id_destino"])) == 7:
+            ip_final_destino = 3
+        elif len(str(nova_transferencia["id_destino"])) == 6:
+            ip_final_destino = 2
+        else:
+            ip_final_destino = 1
+
+        #para ver a ultima parte do ip referente ao id da conta de origem
+        if len(str(nova_transferencia["id_origem"])) == 7:
+            ip_final_origem = 3
+        elif len(str(nova_transferencia["id_origem"])) == 6:
+            ip_final_origem = 2
+        else:
+            ip_final_origem = 1
+
+        #para ver a primeira parte do ip da maquina
+        if len(ip) == 13:
+            ip_inicial = ip[:-3]
+        else:
+            ip_inicial = ip.rsplit('.', 1)[0] + '.'
+        url_destino = f"http://{ip_inicial + str(nova_transferencia["id_destino"])[-ip_final_destino:]}:8081/receber"
            
         try:
-            url_origem = f"http://192.168.1.10{str(nova_transferencia["id_origem"])[5]}:8081/preparar"
+            url_origem = f"http://{ip_inicial + str(nova_transferencia["id_destino"])[-ip_final_origem:]}:8081/preparar"
             print(url_origem)
             response = requests.post(url_origem, json=nova_transferencia, timeout=1)
             
@@ -280,24 +301,24 @@ def fazer_transferencia():
                 for item in lista_destino:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_destino =  f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        url_destino =  f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                         print(url_destino)
                         print(item,  "1")
                         response = requests.post(url_destino, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_destino =  f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            url_destino =  f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                             print(url_destino)
                             print(item,  "1")
                             response = requests.post(url_destino, json=item, timeout=1)
                 for item in lista_origem:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                         print(url_origem)
                         print(item,  "1")
                         response = requests.post(url_origem, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                             print(url_origem)
                             print(item,  "1")
                             response = requests.post(url_origem, json=item, timeout=1)
@@ -324,24 +345,24 @@ def fazer_transferencia():
                 for item in lista_destino:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                         print(url_destino)
                         print(item,  "2")
                         response = requests.post(url_destino, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                             print(url_destino)
                             print(item,  "2")
                             response = requests.post(url_destino, json=item, timeout=1)
                 for item in lista_origem:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                         print(url_origem)
                         print(item,  "2")
                         response = requests.post(url_origem, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                             print(url_origem)
                             print(item,  "2")
                             response = requests.post(url_origem, json=item, timeout=1)
@@ -356,24 +377,24 @@ def fazer_transferencia():
                 for item in lista_destino:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                         print(url_destino)
                         print(item,  "3")
                         response = requests.post(url_destino, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_destino = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                             print(url_destino)
                             print(item,  "3")
                             response = requests.post(url_destino, json=item, timeout=1)
                 for item in lista_origem:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                        url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                         print(url_origem)
                         print(item,  "3")
                         response = requests.post(url_origem, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_origem = f"http://192.168.1.10{str(item["id"])[5]}:8081/reverter"
+                            url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                             print(url_origem)
                             print(item,  "3")
                             response = requests.post(url_origem, json=item, timeout=1)
