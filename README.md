@@ -40,7 +40,7 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
         <li>Caso exista alguma operação a ser feita pelo banco detentor do token, apenas uma é feita e o token é passado para o proximo da lista.</li>
         <li>Caso não exista nenhuma operação a ser feita pelo banco detentor do token, o token é passado para o proximo da lista.</li>
     </ol>
-    <h3>Gerenciamento de Contas</h3>
+    <h2>Gerenciamento de Contas</h2>
     Para a criação de clientes foi utilizado a rota <strong>http://localhost:8081/clientes</strong> e a rota <strong>http://localhost:8081/clientes/{id_usuario}/contas</strong>, sendo a primeira responsável por criar um cliente e a segunda para definir uma conta principal do cliente para o banco, sendo que operações como consultar saldo, depositar e sacar dinheiro só seriam feitas para a conta principal naquele banco. Além disso, foi utilizada a rota <strong>http://localhost:8081/transferencias</strong> para mandar transações entre clientes de um mesmo banco ou entre bancos diferentes. Por fim, Vale ressaltar que tiverem outras rotas além dessas mencionadas, como a de fazer login <strong>http://localhost:8081/login</strong>, a de fazer deposito <strong>http://localhost:8081/clientes/{id}/contas/{id}/depositar</strong>, a de sacar <strong>http://localhost:8081/clientes/{id}/contas/{id}/sacar</strong>, e a de buscar cliente e contas que são utilizações das rotas citadas só que utilizando métodos diferentes:
     <h4>Sobre os métodos</h4>
         <ul>
@@ -86,13 +86,9 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
         </div>
     <br>
     <p><strong>Obs.:</strong> Embora eu tenha uma rota para criar cliente e outra para criar usuário, ao me referir a um cliente específico, estou falando de um usuário que possui uma conta associada ao seu ID. Ou seja, cliente e conta se referem ao mesmo usuário. Além disso, uma transação pode ter varias operações diferente do que está sendo mostrado na imagem que só tem uma.</p>
-    <h3>Comunicação Dispositivo-Broker</h3>
-        <p>Para a comunicação entre o dispositivo e o broker foi utilizados dois protocolos, o TCP para envio de comandos/solicitações do broker para o dispositivo e o UDP para envio de dados do dispositivo para o broker.</p>
-        <p>Mas, para que utilizar dois protocolos diferentes?</p>
-        <p><strong>TCP</strong>, o protocolo de comunicação TCP foi utilizado no projeto para o envio de comandos/solicitações para os dispositivos porque é necessário garantir que aqueles dados foram entregues com sucesso, o que não é garantido pelo protocolo UDP.</p>
-        <p><strong>UDP</strong>, o protocolo de comunicação UDP foi utilizado no projeto porque é preciso mandar dados do dispositivo para o broker de maneira rápida e periódica sem se importar tanto se o dado chegou inteiro, já que será enviado novamente em seguida.</p>
-    <p>Segue uma figura ilustrativa sobre essa troca de mensagens.</p>
-    <br>
+    <h2>Transferência entre diferentes contas</h2>
+        <p>Como mencionado no tópico anterior é possível realizar transferências entre diferentes contas através da rota de transferências utilizando o formato demonstrado. Sendo que o campo "Usuário" refere-se ao ID do usuário que está realizando a transação, "id_destino" refere-se ao ID da conta de destino (destinatário da transferência), "id_origem" refere-se ao ID da conta do usuário naquele banco (ou de outro banco que ele também tenha conta), "valor" refere-se ao valor da transferência e o "status" refere-se ao status da transação que pode ser finalizada ou não.</p>
+        <p>Exemplo de transferência entre diferentes contas (imagem do valor retirado e depositado)</p>
         <div align="center">
             <figure>
                 <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-03%20210608.png" alt="Descrição da Imagem">
@@ -101,26 +97,14 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
             </figure>
         </div>
     <br>
-    <h2>Interface do Dispositivo</h2>
-    Antes de falar da interface, vale ressaltar que o dispositivo mensionado é um sensor de temperatura que faz médições periódicas de temperatura em graus célsius e manda para o broker caso o dispositivo esteje ligado.
-    <p>A figuras as seguir mostram a interface CLI do dispositivo ligado e desligado que permite ao usuário ligar ou desligar o dispositivo.</p>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-03%20232415.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Interface do Dispositivo ligado</figcaption>
-            </figure>
-        </div>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-03%20230711.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Interface do Dispositivo desligado</figcaption>
-            </figure>
-        </div>
-    <br>
+    <h2>Comunicação entre os Servidores</h2>
+    O protocolo de comunicação <strong>HTTP</strong> (HyperText Transfer Protocol) foi escolhido devido à sua ampla adoção e versatilidade na comunicação entre clientes e servidores na web. Ele é robusto e eficiente, permitindo a transferência de dados de maneira rápida e segura. A arquitetura cliente-servidor do <strong>HTTP</strong> facilita a implementação de sistemas distribuídos e escaláveis.
+    <h2>Sincronização em um único servidor</h2>
+    Para evitar conflitos de dados em um servidor único, como quando dois usuários de um banco tentam realizar transações simultâneas, utilizamos o método <strong>'lock'</strong> do Python. Esse recurso garante que apenas um usuário por vez tenha acesso a um recurso específico, garantindo a integridade dos dados e prevenindo inconsistências durante as operações.
+    <h2>Sincronização para mais de um servidor</h2>
+    Para evitar conflitos de dados entre servidores, adotamos a topologia de rede em anel, onde um token é passado de um nó para outro no sistema bancário. Essa abordagem garante que apenas o banco detentor do token possa realizar transferências, proporcionando controle sobre as operações. No entanto, a implementação dessa topologia pode apresentar desafios, como a possível perda do token, o que pode resultar em ociosidade no sistema.
+
+Para mitigar esse problema, estabelecemos que se um banco não receber o token por um período prolongado, ele iniciará um processo para gerar um novo token na rede. Isso visa evitar longos períodos de espera desnecessária entre os bancos na rede, mantendo a eficiência das operações. Além disso, para lidar com a situação em que uma máquina que perdeu o token retorna à rede, implementamos um número de sequência para cada token. Dessa forma, apenas o token com o número de sequência maior será reconhecido pela rede, prevenindo a ocorrência de concorrência com dois tokens simultâneos.
     <h2>Interface do Cliente</h2>
     <p>Como permitido, a interface para a comunicação entre o cliente e o broker foi feita via interface de linha de comando (CLI).</p>
     <p>A principio, ao iniciar o cliente irá aparecer uma tela com um menu com o que pode ser solicitado ao broker, o usuário deve escolher primeiro o comando e depois o número do sensor que ele deseja fazer a solicitação.</p>
