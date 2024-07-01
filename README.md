@@ -37,7 +37,7 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
     <ol>
         <li>Todos os bancos são inicializados, inclusive o escolhido para iniciar com o token.</li>
         <li>Qualquer cliente pode inserir uma transação a ser feita no seu banco.</li>
-        <li>Caso exista alguma operação a ser feita pelo banco detentor do token, apenas uma é feita e o token é passado para o proximo da lista. Caso contrário, o token é passado mesmo assim.</li>
+        <li>Caso exista alguma operação a ser feita pelo banco detentor do token, apenas uma é feita e o token é passado para o proximo da lista.</li>
         <li>Caso não exista nenhuma operação a ser feita pelo banco detentor do token, o token é passado para o proximo da lista.</li>
     </ol>
     <h3>Comunicação Cliente-Broker</h3>
