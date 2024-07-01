@@ -85,7 +85,7 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
             </figure>
         </div>
     <br>
-    <p><strong>Obs.:</strong>Embora eu tenha uma rota para criar cliente e outra para criar usuário, ao me referir a um cliente específico, estou falando de um usuário que possui uma conta associada ao seu ID. Ou seja, cliente e conta se referem ao mesmo usuário. Além disso, uma transação pode ter varias operações diferente do que está sendo mostrado na imagem que só tem uma.</p>
+    <p><strong>Obs.:</strong> Embora eu tenha uma rota para criar cliente e outra para criar usuário, ao me referir a um cliente específico, estou falando de um usuário que possui uma conta associada ao seu ID. Ou seja, cliente e conta se referem ao mesmo usuário. Além disso, uma transação pode ter varias operações diferente do que está sendo mostrado na imagem que só tem uma.</p>
     <h3>Comunicação Dispositivo-Broker</h3>
         <p>Para a comunicação entre o dispositivo e o broker foi utilizados dois protocolos, o TCP para envio de comandos/solicitações do broker para o dispositivo e o UDP para envio de dados do dispositivo para o broker.</p>
         <p>Mas, para que utilizar dois protocolos diferentes?</p>
