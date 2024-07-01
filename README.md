@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body> 
-  <h1>Internet das Coisas</h1>
-    <p>Devido aos avanços tecnológicos nas áreas de sitemas embarcados, microeletrônica, comunicação e sensoriamento, o termo Internet das Coisas (<em>Internet of things</em>, IoT) criado por Kevin Ashton, vem sendo muito discutido nos dias atuais frente as possíveis aplicações as mais diversas áreas como saúde, energia, cidades inteligentes, etc.</p>
+  <h1>Transações Bancárias Distribuídas</h1>
+    <p>
+Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam facilitar a maneira com que os usuários realizam transações e operações no dia a dia, como checar saldo, extrato, limite de crédito, entre outros, houve um aumento substancial na adesão de seus clientes a essas plataformas. Além disso, outro fator culminante que influenciou esse desenvolvimento foi o surgimento da ferramenta Pix, cujo principal objetivo é garantir a rapidez dos pagamentos 24 horas por dia.</p>
     <p></p>
-    <p>Mediante a isso, esse projeto tem o intuito de realizar a conexão de dispositivos simulados via script em python com uma interface cliente por meio de um sistema de mensageria chamado de broker, sendo utilizados para isso os protocolos de comunicação TCP e UDP para a comunicação dispositivo-broker e uma API em python para realizar a comunicação broker-cliente.</p>
+    <p>Mediante a isso, um país onde não existe um sistema bancário centralizado decidiu implementar a ferramenta Pix. No entanto, existem algumas diferenças na sua implementação devido ao seu sistema distinto. Para isso, é necessário utilizar uma abordagem que garanta a não concorrência nas operações entre os bancos e assegure a atomicidade das transações, evitando problemas como duplicação de dinheiro, perca de dinheiro, etc.</p>
     <h2>Arquiterura do Projeto</h2>
     O projeto funciona da seguinte forma:
         <ol>
