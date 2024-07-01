@@ -40,38 +40,44 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
         <li>Caso exista alguma operação a ser feita pelo banco detentor do token, apenas uma é feita e o token é passado para o proximo da lista.</li>
         <li>Caso não exista nenhuma operação a ser feita pelo banco detentor do token, o token é passado para o proximo da lista.</li>
     </ol>
-    <h3>Comunicação Cliente-Broker</h3>
-    Para a comunicação entre o cliente e o broker foi utilizada uma API RESTful que possui uma rota para os sensores <strong>http://localhost:8081/sensores</strong> e uma rota para as solicitações <strong>http://localhost:8081/solicitacoes</strong>, cada uma delas possui um método <strong>POST</strong>, <strong>GET</strong>, <strong>PUT</strong> e <strong>DELETE</strong> para fazer possíveis alterações.
-    <h4>Sobre os Métodos</h4>
+    <h3>Gerenciamento de Contas</h3>
+    Para a criação de clientes foi utilizado a rota <strong>http://localhost:8081/clientes</strong> e a rota <strong>http://localhost:8081/clientes/{id_usuario}/contas</strong>, sendo a primeira responsável por criar um cliente e a segunda para definir uma conta principal do cliente para o banco, sendo que operações como consultar saldo, depositar e sacar dinheiro só seriam feitas para a conta principal naquele banco. Além disso, foi utilizada a rota <strong>http://localhost:8081/transferencias</strong> para mandar transações entre clientes de um mesmo banco ou entre bancos diferentes. Por fim, Vale ressaltar que tiverem outras rotas além dessas mencionadas, como a de fazer login <strong>http://localhost:8081/login</strong>, a de fazer deposito <strong>http://localhost:8081/clientes/{id}/contas/{id}/depositar</strong>, a de sacar <strong>http://localhost:8081/clientes/{id}/contas/{id}/sacar</strong>, e a de buscar cliente e contas que são utilizações das rotas citadas só que utilizando métodos diferentes:
+    <h4>Sobre os métodos</h4>
         <ul>
             <p>-<strong>POST</strong>, método responsável por criar um item na rota expecíficada.</p>
             <p>-<strong>GET</strong>, método responsável por pegar um item na rota expecíficada.</p>
             <p>-<strong>PUT</strong>, método responsável por atualizar um item na rota expecíficada.</p>
             <p>-<strong>DELETE</strong>, método responsável por deletar um item na rota expecíficada.</p>
         </ul>
-    <p><strong>Obs.:</strong> para testar se as rotas estavam funcionando foi utilizado o software Insomnia.</p>
+    <p><strong>Obs.:</strong> para testar se as rotas estavam funcionando foi utilizado o software Insomnia e Postman.</p>
     <br>
-    <p>Os dados salvos nessas rotas são guardados no formato parecido com o de um dicionário, possuindo chave:valor.</p>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-03%20165615.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Exemplo do Formato</figcaption>
-            </figure>
-        </div>
-    <br>
-    <p>Basicamente o que é feito quando chega um dado novo ao broker pelo dispositivo é que o dado é atualizado de acordo com o endereço IP do dispositivo no dicionário, para que o cliente possua o dado mais atualizado caso solicite esse dado por solicitação pela rota <strong>http://localhost:8081/solicitacoes</strong>, já quando o cliente manda uma solicitação para a rota <strong>http://localhost:8081/solicitacoes</strong>, ela é verificada pelo broker e então repassada para o dispositivo solicitado.</p>
-    <p>Segue uma figura ilustrativa sobre essa troca de mensagens.</p>
+    <p>Os dados para gerenciamento dessas contas pelas rotas são enviados no formato parecido com a de um dicionário, as seguintes imagens são referentes ao formato enviado para fazer saques e depositos, outra para criar cliente e outra para adicionar uma conta.</p>
     <br>
         <div align="center">
             <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-03%20210254.png" alt="Descrição da Imagem">
+                <img src="IMG/Captura de tela 2024-07-01 164206.png" alt="Descrição da Imagem">
                 <br>
-                <figcaption>Comunicação Cliente-Broker</figcaption>
+                <figcaption>Exemplo de Saque/Deposito</figcaption>
             </figure>
         </div>
     <br>
+        <div align="center">
+            <figure>
+                <img src="IMG/Captura de tela 2024-07-01 164719.png" alt="Descrição da Imagem">
+                <br>
+                <figcaption>Exemplo de Cliente</figcaption>
+            </figure>
+        </div>
+    <br>
+        <div align="center">
+            <figure>
+                <img src="IMG/Captura de tela 2024-07-01 164832.png" alt="Descrição da Imagem">
+                <br>
+                <figcaption>Exemplo de Conta</figcaption>
+            </figure>
+        </div>
+    <br>
+    <p><strong>Obs.:</strong>Embora eu tenha uma rota para criar cliente e outra para criar usuário, ao me referir a um cliente específico, estou falando de um usuário que possui uma conta associada ao seu ID. Ou seja, cliente e conta se referem ao mesmo usuário.</p>
     <h3>Comunicação Dispositivo-Broker</h3>
         <p>Para a comunicação entre o dispositivo e o broker foi utilizados dois protocolos, o TCP para envio de comandos/solicitações do broker para o dispositivo e o UDP para envio de dados do dispositivo para o broker.</p>
         <p>Mas, para que utilizar dois protocolos diferentes?</p>
