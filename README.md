@@ -168,56 +168,6 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
     <h2>Confiabilidade da Solução</h2>
     <p>Durante o desenvolvimento do projeto foi discutido sobre a importância dos dispositivos e clientes conectados ao broker não pararem de funcionar completamente após o fim da sua execução ou quando por algum motivo a conexão internet da máquina que esteje rodando o broker caia, pois se o broker está ou não conectado não deveria afetar a execução nem dos Clientes e nem dos Dispositivos. Para isso, foi-se utilizado uma verificação tanto nos Dispositivos quanto nos clientes para saber se o broker está funcionando, para que caso não esteja os Dispositivos continuem tentando estabelecer a conexão e o Cliente informe que não é possível realizar uma solicitação ao broker.</p>
     <p>Além disso, foi importante fazer um tratamento de erro para as trocas de mensagens entre o Dispositivo-Broker e Cliente-Broker para que mesmo se um deles pare de funcionar, não afete o funcionamento do resto, ou seja, mesmo se um deles parar de funcionar o resto vai continuar rodando  para caso a conexão seja restabelecida</p>
-    <h2>Sobre o Projeto</h2>
-    <h3>Cliente</h3>
-    <p>Segue as funções contidas no <strong>'cliente.py'</strong></p></p>
-    <ul>
-        <li><strong>obter_lista_de_sensores()</strong>, responsável por consumir a rota da API que guarda dados sobre os dispositivos conectados.</li>
-        <li><strong>limpar_terminal()</strong>, responsável por limpar o terminal da interface CLI do cliente.</li>
-        <li><strong>menu()</strong>, responsável por mostrar as opções ao usuário e repassar os comandos realizados por ele ao broker.</li>
-        <li><strong>main()</strong>, responsável por chamar tudo que vai ser realizado na execução.</li>
-    </ul>
-    <h3>Dispositivo</h3>
-    <p>Segue as funções contidas no <strong>'dispositivo.py'</strong></p>
-    <ul>
-        <li><strong>gerar_temperatura()</strong>, responsável por gerar temperaturas aleatórias entre 20° e 30°.</li>
-        <li><strong>receber_mensagem_tcp()</strong>, responsável por fazer a conexão do dispositivo com o broker para que ele possa receber as mensagens TCP.</li>
-        <li><strong>enviar_mensagem_udp()</strong>, responsável por enviar os dados ao broker em UDP.</li>
-        <li><strong>entrada()</strong>, responsável por esperar por uma solicitação do usuário via CLI no dispositivo.</li>
-        <li><strong>limpar_terminal()</strong>, responsável por limpar a interface CLI do dispositivo.</li>
-        <li><strong>main()</strong>, responsável por criar threads para que o dispositivo consiga receber mensagens TCP, enviar mensagens UDP e esperar uma solicitação do usuário via CLI constantemente.</li>
-    </ul>
-    <h3>Broker</h3>
-    <p>Diferente dos demais, o <strong>'broker.py'</strong> guarda a parte referente ao Servidor para lidar com a comunicação com os dispositivos e a parte da API para poder pegar requisições dos clientes e subir dados para que o cliente possa acessá-los</p>
-    <ul>
-    <h3>Servidor</h3>
-            <p>Segue as funções referentes a parte do servidor no <strong>'broker.py'</strong></p>
-            <ul>
-                <li><strong>broker()</strong>, responsável por iniciar o servidor TCP e aceitar conexões dos dispositivos.</li>
-                <li><strong>receber_udp()</strong>, responsável por receber os dados dos dispositivos.</li>
-                <li><strong>atualizar_dados()</strong>, responsável por manter os dados atualizados no dicionário da API</li>
-                <li><strong>data_atual()</strong>, responsável por pegar a data atual para passar ao dado atual</li>
-                <li><strong>tratamento_mensagens()</strong>, responsável por verificar se tem alguma solicitação pendente de um cliente para um dispositivo para repassá-lo ao dispositivo.</li>
-                <li><strong>remover_solicitação()</strong>, responsável por remover uma solicitação no dicionário da API.</li>
-                <li><strong>obter_lista_solicitações()</strong>, responsável por pegar a lista de dicionários da API.</li>
-                <li><strong>enviar_tcp()</strong>, responsável por enviar a mensagem tcp ao dispositivo escolhido.</li>
-                <li><strong>delete_cliente()</strong>, responsável por deletar um cliente da lista de clientes.</li>
-            </ul>
-    <h3>API</h3>
-        <p>Segue as funções referentes a parte da API no <strong>'api.py'</strong></p>
-        <ul>
-            <li><strong>get_sensores()</strong>, responsável por retornar os dados e todos os sensores registrados na sua aplicação.</li>
-            <li><strong>get_sensor()</strong>, responsável por retornar os dados de um sensor expecífico registrado na aplicação.</li>
-            <li><strong>criar_sensor()</strong>, responsável por criar e registrar um sensor na aplicação.</li>
-            <li><strong>atualizar_sensor()</strong>, responsável por atualizar dados de um sensor na aplicação.</li>
-            <li><strong>excluir_sensor()</strong>, responsável por remover um sensor da aplicação.</li>
-            <li><strong>get_solicitacoes()</strong>, responsável por retornar os dados e todas as solicitações registradas na sua aplicação.</li>
-            <li><strong>get_solicitacao()</strong>, responsável por retornar os dados de uma solicitação expecífica registrada na aplicação.</li>
-            <li><strong>criar_solicitacao()</strong>, responsável por criar e registrar uma solicitação na aplicação.</li>
-            <li><strong>atualizar_solicitacao()</strong>, responsável por atualizar dados de uma solicitação na aplicação.</li>
-            <li><strong>excluir_solicitacao()</strong>, responsável por remover uma solicitação da aplicação.</li>
-        </ul>
-    </ul>
     <h2>Conclusão</h2>
     <p>Enfim, conclui-se que o projeto entregue abrange todos os requisitos solicitados no problema, abordando o uso de threads, criação de um broker para troca de mensagens, criação de uma dispositivo/atuador, uso de uma API RESTful , uso de docker para facilitar a execução do sistema por terceiros, o uso do software Insomnia para testes nas rotas e por fim o uso dos protocolos TCP e UDP para troca de mensagens.</p>
     <p>Ademais, vale mencionar possíveis alterações para uma melhor usabilidade da interface do cliente como o uso de React para o front-end, adição de outros tipos de dispositivos ou até mesmo fazer uso de dispositivos reais.</p>
@@ -231,7 +181,7 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
       <li>digite <strong>'docker images'</strong> para ver se as imagens docker foram criadas com sucesso.</li>
       <li>por fim, execute o programa usando o comando <strong>'docker run --network='host' -it -e IP_ADDRESS=ip_do_banco nome_da_imagem'</strong> para executar as imagens dos bancos e dos clientes.</li>
    </ul>
-  <p>tendo feito isso, é possível criar contas, realizar depositos, saques, etc.</p>    
+  <p>tendo feito isso, é possível criar contas, consultar saldo, realizar depositos, saques, transferências de todas as contas finculadas a um cliente expecífico.</p>    
     <p><strong>Obs.:</strong> é necessário ter o docker instalado na máquina que deseja executar o código.</p>
 </body>
 </html>
