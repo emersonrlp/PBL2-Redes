@@ -225,13 +225,13 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
     <p>Siga os seguintes passos para a execução do projeto:</p>
     <ul>
       <li>baixe o repositório: 
-          <a href="https://github.com/emersonrlp/MI-de-Redes.git">https://github.com/emersonrlp/MI-de-Redes.git</a>
+          <a href="https://github.com/emersonrlp/PBL2-Redes">https://github.com/emersonrlp/PBL2-Redes.git</a>
       </li>
-      <li>execute o seguinte comando com o terminal nas pastas Cliente, Dispositivo e Broker: <strong>'docker build -t nome_do_arquivo .'</strong></li>
+      <li>execute o seguinte comando com o terminal nas pastas Cliente e Banco: <strong>'docker build -t nome_do_arquivo .'</strong></li>
       <li>digite <strong>'docker images'</strong> para ver se as imagens docker foram criadas com sucesso.</li>
-      <li>por fim, execute o programa usando o comando <strong>'docker run --network='host' -it -e IP_ADDRESS=ip_do_broker nome_da_imagem'</strong> para executar as imagens do dispositivo e do cliente criadas e <strong>'docker run --network='host' -it nome_da_imagem'</strong> para executar a imagem do broker.</li>
+      <li>por fim, execute o programa usando o comando <strong>'docker run --network='host' -it -e IP_ADDRESS=ip_do_banco nome_da_imagem'</strong> para executar as imagens dos bancos e do cliente criadas.</li>
    </ul>
-  <p>tendo feito isso, é possível fazer solicitações por meio do cliente via CLI pedindo para que forneça a temperatura, desligue ou ligue um determinado dispositivo.</p>    
+  <p>tendo feito isso, é possível criar contas, realizar depositos, saques, etc.</p>    
     <p><strong>Obs.:</strong> é necessário ter o docker instalado na máquina que deseja executar o código.</p>
 </body>
 </html>
