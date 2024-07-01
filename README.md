@@ -11,20 +11,33 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
     <p></p>
     <p>Mediante a isso, um país onde não existe um sistema bancário centralizado decidiu implementar a ferramenta Pix. No entanto, existem algumas diferenças na sua implementação devido ao seu sistema distinto. Para isso, é necessário utilizar uma abordagem que garanta a não concorrência nas operações entre os bancos e assegure a atomicidade das transações, evitando problemas como duplicação de dinheiro, perca de dinheiro, etc.</p>
     <h2>Arquiterura do Projeto</h2>
-    O projeto funciona da seguinte forma:
-        <ol>
-            <li>O broker inicializa o servidor TCP, o servidor UDP e a API para poder trocar mensagens com os dispositivos e com os clientes.</li>
-            <li>O dispositivo tenta se conectar ao servidor para poder receber mensagens TCP e envia dados UDP periodicamente ao broker.</li>
-            <li>O cliente comunica com a API as solicitações que ele deseja fazer ao broker.</li>
-            <br>
-            <div align="center">
+    <p>Antes de explicar como é a arquitetura do projeto em si, vamos dar uma olhada e entender o que é um sistema que possui um Banco Central.</p>
+    <br>
+    <div align="center">
                 <figure>
-                    <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-04-24%20210107.png" alt="Descrição da Imagem">
+                    <img src="IMG/Captura de tela 2024-07-01 121301.png" alt="Descrição da Imagem">
                     <br>
-                    <figcaption>Arquitetura do Projeto</figcaption>
+                    <figcaption>Arquitetura do Banco Central</figcaption>
                 </figure>
             </div>
-        </ol>
+    <br>
+    <p>Como mostra a imagem, o banco central é responsável por encaminhar todas as operações feitas entre os bancos e garantir a confiabilidade dessas operações, evitando gastos indevidos de dinheiro. Isso é possível porque todas as operações passam pelo banco central antes de serem concluídas. Caso haja conflito entre as transações, não haverá problema, pois existe uma ordem definida para cada uma.</p>
+    <p>Tendo mostrado um pouco de como funciona um sistema com o Banco Central, vamos ver como é a Arquitetura do sistema sem a presença de um Banco Central.</p>
+    <br>
+    <div align="center">
+        <figure>
+            <img src="IMG/Captura de tela 2024-07-01 125117.png" alt="Descrição da Imagem">
+            <br>
+            <figcaption>Arquitetura do Projeto</figcaption>
+        </figure>
+    </div>
+    <br>
+    <p>No sistema mencionado, diferente do que tínhamos com o Banco Central, não há um ente responsável por receber todas as transações ou garantir sua confiabilidade. Em vez disso, cada banco segue uma regra pré-definida para evitar possíveis erros. Nesse caso, foi utilizada uma topologia de rede de computadores chamada Token Ring para garantir que somente um banco por vez possa efetuar uma transação, pois apenas um banco por vez terá acesso ao token, que é a entidade que permite a realização de uma transferência.</p>
+    <ol>
+        <li>O broker inicializa o servidor TCP, o servidor UDP e a API para poder trocar mensagens com os dispositivos e com os clientes.</li>
+        <li>O dispositivo tenta se conectar ao servidor para poder receber mensagens TCP e envia dados UDP periodicamente ao broker.</li>
+        <li>O cliente comunica com a API as solicitações que ele deseja fazer ao broker.</li>
+    </ol>
     <h3>Comunicação Cliente-Broker</h3>
     Para a comunicação entre o cliente e o broker foi utilizada uma API RESTful que possui uma rota para os sensores <strong>http://localhost:8081/sensores</strong> e uma rota para as solicitações <strong>http://localhost:8081/solicitacoes</strong>, cada uma delas possui um método <strong>POST</strong>, <strong>GET</strong>, <strong>PUT</strong> e <strong>DELETE</strong> para fazer possíveis alterações.
     <h4>Sobre os Métodos</h4>
