@@ -33,10 +33,12 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
     </div>
     <br>
     <p>No sistema mencionado, diferente do que tínhamos com o Banco Central, não há um ente responsável por receber todas as transações ou garantir sua confiabilidade. Em vez disso, cada banco segue uma regra pré-definida para evitar possíveis erros. Nesse caso, foi utilizada uma topologia de rede de computadores chamada Token Ring para garantir que somente um banco por vez possa efetuar uma transação, pois apenas um banco por vez terá acesso ao token, que é a entidade que permite a realização de uma transferência.</p>
+    <p>Segue um fluxo da execução do sistema:</p>
     <ol>
-        <li>O broker inicializa o servidor TCP, o servidor UDP e a API para poder trocar mensagens com os dispositivos e com os clientes.</li>
-        <li>O dispositivo tenta se conectar ao servidor para poder receber mensagens TCP e envia dados UDP periodicamente ao broker.</li>
-        <li>O cliente comunica com a API as solicitações que ele deseja fazer ao broker.</li>
+        <li>Todos os bancos são inicializados, inclusive o escolhido para iniciar com o token.</li>
+        <li>Qualquer cliente pode inserir uma transação a ser feita no seu banco.</li>
+        <li>Caso exista alguma operação a ser feita pelo banco detentor do token, apenas uma é feita e o token é passado para o proximo da lista. Caso contrário, o token é passado mesmo assim.</li>
+        <li>Caso não exista nenhuma operação a ser feita pelo banco detentor do token, o token é passado para o proximo da lista.</li>
     </ol>
     <h3>Comunicação Cliente-Broker</h3>
     Para a comunicação entre o cliente e o broker foi utilizada uma API RESTful que possui uma rota para os sensores <strong>http://localhost:8081/sensores</strong> e uma rota para as solicitações <strong>http://localhost:8081/solicitacoes</strong>, cada uma delas possui um método <strong>POST</strong>, <strong>GET</strong>, <strong>PUT</strong> e <strong>DELETE</strong> para fazer possíveis alterações.
