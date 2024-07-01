@@ -229,7 +229,7 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
       </li>
       <li>execute o seguinte comando com o terminal nas pastas Cliente e Banco: <strong>'docker build -t nome_do_arquivo .'</strong></li>
       <li>digite <strong>'docker images'</strong> para ver se as imagens docker foram criadas com sucesso.</li>
-      <li>por fim, execute o programa usando o comando <strong>'docker run --network='host' -it -e IP_ADDRESS=ip_do_banco nome_da_imagem'</strong> para executar as imagens dos bancos e do cliente criadas.</li>
+      <li>por fim, execute o programa usando o comando <strong>'docker run --network='host' -it -e IP_ADDRESS=ip_do_banco nome_da_imagem'</strong> para executar as imagens dos bancos e dos clientes.</li>
    </ul>
   <p>tendo feito isso, é possível criar contas, realizar depositos, saques, etc.</p>    
     <p><strong>Obs.:</strong> é necessário ter o docker instalado na máquina que deseja executar o código.</p>
