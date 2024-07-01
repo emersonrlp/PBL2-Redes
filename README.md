@@ -99,6 +99,7 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
     <br>
     <h2>Comunicação entre os Servidores</h2>
     O protocolo de comunicação <strong>HTTP</strong> (HyperText Transfer Protocol) foi escolhido devido à sua ampla adoção e versatilidade na comunicação entre clientes e servidores na web. Ele é robusto e eficiente, permitindo a transferência de dados de maneira rápida e segura. A arquitetura cliente-servidor do <strong>HTTP</strong> facilita a implementação de sistemas distribuídos e escaláveis.
+    Além disso, o <strong>HTTP</strong> é compatível com diversos tipos de dados, como texto, imagens, vídeos e outros formatos de mídia, tornando-o ideal para aplicações web que precisam transmitir diferentes tipos de conteúdo. O suporte a uma variedade de métodos de requisição, como <strong>GET</strong>, <strong>>POST</strong, <strong>PUT</strong> e <strong>DELETE</strong>, é essencial para operações <strong>CRUD</strong> (Create, Read, Update, Delete) em sistemas de gerenciamento de dados.
     <h2>Sincronização em um único servidor</h2>
     Para evitar conflitos de dados em um servidor único, como quando dois usuários de um banco tentam realizar transações simultâneas, utilizamos o método <strong>'lock'</strong> do Python. Esse recurso garante que apenas um usuário por vez tenha acesso a um recurso específico, garantindo a integridade dos dados e prevenindo inconsistências durante as operações.
     <h2>Sincronização para mais de um servidor</h2>
