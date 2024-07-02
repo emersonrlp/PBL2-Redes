@@ -40,7 +40,7 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
         <li>Caso exista alguma operação a ser feita pelo banco detentor do token, apenas uma é feita e o token é passado para o proximo da lista.</li>
         <li>Caso não exista nenhuma operação a ser feita pelo banco detentor do token, o token é passado para o proximo da lista.</li>
     </ol>
-    <h3>Gerenciamento de Contas</h3>
+    <h2>Gerenciamento de Contas</h2>
     Para a criação de clientes foi utilizado a rota <strong>http://localhost:8081/clientes</strong> e a rota <strong>http://localhost:8081/clientes/{id_usuario}/contas</strong>, sendo a primeira responsável por criar um cliente e a segunda para definir uma conta principal do cliente para o banco, sendo que operações como consultar saldo, depositar e sacar dinheiro só seriam feitas para a conta principal naquele banco. Além disso, foi utilizada a rota <strong>http://localhost:8081/transferencias</strong> para mandar transações entre clientes de um mesmo banco ou entre bancos diferentes. Por fim, Vale ressaltar que tiverem outras rotas além dessas mencionadas, como a de fazer login <strong>http://localhost:8081/login</strong>, a de fazer deposito <strong>http://localhost:8081/clientes/{id}/contas/{id}/depositar</strong>, a de sacar <strong>http://localhost:8081/clientes/{id}/contas/{id}/sacar</strong>, e a de buscar cliente e contas que são utilizações das rotas citadas só que utilizando métodos diferentes:
     <h4>Sobre os métodos</h4>
         <ul>
@@ -51,7 +51,7 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
         </ul>
     <p><strong>Obs.:</strong> para testar se as rotas estavam funcionando foi utilizado o software Insomnia e Postman.</p>
     <br>
-    <p>Os dados para gerenciamento dessas contas pelas rotas são enviados no formato parecido com a de um dicionário, as seguintes imagens são referentes ao formato enviado para fazer saques e depositos, outra para criar cliente e outra para adicionar uma conta.</p>
+    <p>Os dados para gerenciamento dessas contas pelas rotas são enviados no formato parecido com a de um dicionário, as seguintes imagens são referentes ao formato enviado para fazer saques e depositos, outra para criar cliente, outra para adicionar uma conta e a última para fazer uma transação.</p>
     <br>
         <div align="center">
             <figure>
@@ -77,14 +77,18 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
             </figure>
         </div>
     <br>
-    <p><strong>Obs.:</strong>Embora eu tenha uma rota para criar cliente e outra para criar usuário, ao me referir a um cliente específico, estou falando de um usuário que possui uma conta associada ao seu ID. Ou seja, cliente e conta se referem ao mesmo usuário.</p>
-    <h3>Comunicação Dispositivo-Broker</h3>
-        <p>Para a comunicação entre o dispositivo e o broker foi utilizados dois protocolos, o TCP para envio de comandos/solicitações do broker para o dispositivo e o UDP para envio de dados do dispositivo para o broker.</p>
-        <p>Mas, para que utilizar dois protocolos diferentes?</p>
-        <p><strong>TCP</strong>, o protocolo de comunicação TCP foi utilizado no projeto para o envio de comandos/solicitações para os dispositivos porque é necessário garantir que aqueles dados foram entregues com sucesso, o que não é garantido pelo protocolo UDP.</p>
-        <p><strong>UDP</strong>, o protocolo de comunicação UDP foi utilizado no projeto porque é preciso mandar dados do dispositivo para o broker de maneira rápida e periódica sem se importar tanto se o dado chegou inteiro, já que será enviado novamente em seguida.</p>
-    <p>Segue uma figura ilustrativa sobre essa troca de mensagens.</p>
+        <div align="center">
+            <figure>
+                <img src="IMG/Captura de tela 2024-07-01 170842.png" alt="Descrição da Imagem">
+                <br>
+                <figcaption>Exemplo de Transação</figcaption>
+            </figure>
+        </div>
     <br>
+    <p><strong>Obs.:</strong> Embora eu tenha uma rota para criar cliente e outra para criar usuário, ao me referir a um cliente específico, estou falando de um usuário que possui uma conta associada ao seu ID. Ou seja, cliente e conta se referem ao mesmo usuário. Além disso, uma transação pode ter varias operações diferente do que está sendo mostrado na imagem que só tem uma.</p>
+    <h2>Transferência entre diferentes contas</h2>
+        <p>Como mencionado no tópico anterior é possível realizar transferências entre diferentes contas através da rota de transferências utilizando o formato demonstrado. Sendo que o campo "Usuário" refere-se ao ID do usuário que está realizando a transação, "id_destino" refere-se ao ID da conta de destino (destinatário da transferência), "id_origem" refere-se ao ID da conta do usuário naquele banco (ou de outro banco que ele também tenha conta), "valor" refere-se ao valor da transferência e o "status" refere-se ao status da transação que pode ser finalizada ou não.</p>
+        <p>Exemplo de transferência entre diferentes contas (imagem do valor retirado e depositado)</p>
         <div align="center">
             <figure>
                 <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-03%20210608.png" alt="Descrição da Imagem">
@@ -93,90 +97,26 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
             </figure>
         </div>
     <br>
-    <h2>Interface do Dispositivo</h2>
-    Antes de falar da interface, vale ressaltar que o dispositivo mensionado é um sensor de temperatura que faz médições periódicas de temperatura em graus célsius e manda para o broker caso o dispositivo esteje ligado.
-    <p>A figuras as seguir mostram a interface CLI do dispositivo ligado e desligado que permite ao usuário ligar ou desligar o dispositivo.</p>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-03%20232415.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Interface do Dispositivo ligado</figcaption>
-            </figure>
-        </div>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-03%20230711.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Interface do Dispositivo desligado</figcaption>
-            </figure>
-        </div>
-    <br>
-    <h2>Interface do Cliente</h2>
-    <p>Como permitido, a interface para a comunicação entre o cliente e o broker foi feita via interface de linha de comando (CLI).</p>
-    <p>A principio, ao iniciar o cliente irá aparecer uma tela com um menu com o que pode ser solicitado ao broker, o usuário deve escolher primeiro o comando e depois o número do sensor que ele deseja fazer a solicitação.</p>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-04%20122426.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Menu da Interface</figcaption>
-            </figure>
-        </div>
-    <br>
-    <p>A seguir, temos as imagens de quando é solicitado ver todos os dispositivos já conectados, a temperatura de um determinado sensor, a temperatura de um sensor sendo que ele está desligado e quando há uma falha na comunicação entre cliente e broker, respectivamente.</p>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-04%20122617.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Solicitação para ver todos os dispositivos já conectados</figcaption>
-            </figure>
-        </div>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-04%20122501.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Solicitação de temperatura com o dispositivo ligado</figcaption>
-            </figure>
-        </div>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-04%20122818.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Solicitação de temperatura com o dispositivo desligado</figcaption>
-            </figure>
-        </div>
-    <br>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-04%20122647.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Falha ao se comunicar com o broker</figcaption>
-            </figure>
-        </div>
-    <br>
-    <p>Lembrando que qualquer uma das solicitações escolhidas passará os dados em formato de dicionário para a API.</p>
-    <h2>Sobre o Desempenho</h2>
-    <p>Para melhorar o tempo de resposta foi-se utilizado Threads, Filas e também uma função expecífica do python chamada de timeout().</p>
-    <p>Sobre o uso de fila, ela foi de crucial importância sobretudo para guardar os dados da API e para sempre pegar a primeira solicitação da rota <strong>http://localhost:8081/solicitacoes</strong>, já que não exite prioridade entre as solicitações feitas pelos clientes.</p>
-    <p>Já sobre o uso de Threads, é mais complicado, visto que são utilizados threads tanto no dispositivo quanto no broker.</p>
-    <ul>
-        <p>-Dispositivo, nele é utilizado Threads para receber mensagens TCP, enviar dados UDP e esperar por uma entrada do usuário no dispositivo para caso ele deseje desligar ou ligar manualmente o sensor simultaneamente.</p>
-        <p>-Broker, é utilizado Threads nele para garantir todo dado que chegar da API e do Dispositivo será encaminhado para seu respectivo destino, não havendo perda de dados.</p>    
-    </ul>
-    <p>Por fim, o uso da função timeout() foi utilizada somente no cliente, visto que quando o broker desconectava e o cliente tentava fazer uma solicitação havia uma demora para saber se o broker estava desconectado e a função garante que se o broker demorar mais de 1s para responder é porque ele está desconectado.</p>
-    <h2>Tratamento de Conexões Simultâneas</h2>
-    <p>Embora foi feito o uso de Threads para melhorar o desempenho do código, não foi possível verificar problemas decorrentes ao uso de Threads no sistema com os testes feitos em laboratório, o que não significa que não possa ocorrer futuros problemas quando a adição de um número bem maior de dispositivos ligados. Caso aconteça, seria necessário implementar novas medidas para que ambos os dispositivos sejam capazes de se comunicar de maneira adequada com o broker.</p>
-    <h2>Confiabilidade da Solução</h2>
-    <p>Durante o desenvolvimento do projeto foi discutido sobre a importância dos dispositivos e clientes conectados ao broker não pararem de funcionar completamente após o fim da sua execução ou quando por algum motivo a conexão internet da máquina que esteje rodando o broker caia, pois se o broker está ou não conectado não deveria afetar a execução nem dos Clientes e nem dos Dispositivos. Para isso, foi-se utilizado uma verificação tanto nos Dispositivos quanto nos clientes para saber se o broker está funcionando, para que caso não esteja os Dispositivos continuem tentando estabelecer a conexão e o Cliente informe que não é possível realizar uma solicitação ao broker.</p>
-    <p>Além disso, foi importante fazer um tratamento de erro para as trocas de mensagens entre o Dispositivo-Broker e Cliente-Broker para que mesmo se um deles pare de funcionar, não afete o funcionamento do resto, ou seja, mesmo se um deles parar de funcionar o resto vai continuar rodando  para caso a conexão seja restabelecida</p>
+    <h2>Comunicação entre os Servidores</h2>
+    <p>O protocolo de comunicação <strong>HTTP</strong> (HyperText Transfer Protocol) foi escolhido devido à sua ampla adoção e versatilidade na comunicação entre clientes e servidores na web. Ele é robusto e eficiente, permitindo a transferência de dados de maneira rápida e segura. A arquitetura cliente-servidor do <strong>HTTP</strong> facilita a implementação de sistemas distribuídos e escaláveis.</p>
+    <p>Além disso, o <strong>HTTP</strong> é compatível com diversos tipos de dados, como texto, imagens, vídeos e outros formatos de mídia, tornando-o ideal para aplicações web que precisam transmitir diferentes tipos de conteúdo. O suporte a uma variedade de métodos de requisição, como <strong>GET</strong>, <strong>POST</strong>, <strong>PUT</strong> e <strong>DELETE</strong>, é essencial para operações <strong>CRUD</strong> (Create, Read, Update, Delete) em sistemas de gerenciamento de dados.</p>
+    <h2>Sincronização em um único servidor</h2>
+    Para evitar conflitos de dados em um servidor único, como quando dois usuários de um banco tentam realizar transações simultâneas, utilizamos o método <strong>'lock'</strong> do Python. Esse recurso garante que apenas um usuário por vez tenha acesso a um recurso específico, garantindo a integridade dos dados e prevenindo inconsistências durante as operações.
+    <h2>Sincronização para mais de um servidor</h2>
+    Para evitar conflitos de dados entre servidores, adotamos a topologia de rede em anel, onde um token é passado de um nó para outro no sistema bancário. Essa abordagem garante que apenas o banco detentor do token possa realizar transferências, proporcionando controle sobre as operações. No entanto, a implementação dessa topologia pode apresentar desafios, como a possível perda do token, o que pode resultar em ociosidade no sistema.
+
+Para mitigar esse problema, estabelecemos que se um banco não receber o token por um período prolongado, ele iniciará um processo para gerar um novo token na rede. Isso visa evitar longos períodos de espera desnecessária entre os bancos na rede, mantendo a eficiência das operações. Além disso, para lidar com a situação em que uma máquina que perdeu o token retorna à rede, implementamos um número de sequência para cada token. Dessa forma, apenas o token com o número de sequência maior será reconhecido pela rede, prevenindo a ocorrência de concorrência com dois tokens simultâneos.
+<h2>Confiabilidade do sistema</h2>
+    Quando um dos bancos da rede sai do ar, os outros bancos não são afetados devido ao algoritmo implementado no Token Ring. Este algoritmo sempre tenta passar o token para o próximo banco conectado na rede. Se o próximo banco estiver desconectado, o token é passado para o banco subsequente e assim por diante. Além disso, se um banco que saiu do ar se reconectar, ele eventualmente voltará a receber o token.
+    
+Dessa forma, pode-se assegurar que o sistema é confiável.
+    <h2>Transações concorrentes</h2>
+    <p>No caso de transações concorrentes, não há problema porque tanto o mecanismo de lock quanto o Token Ring garantem que nem clientes do mesmo banco, nem clientes de bancos diferentes, realizarão transações exatamente ao mesmo tempo. Isso significa que as transações só ocorrerão se houver saldo suficiente e no momento correto, evitando assim a duplicação de dinheiro em qualquer uma das contas.</p>
+    <h2>Transações atômicas</h2>
+    <p>O protocolo <strong>2PC</strong> foi utilizado para assegurar a consistência das transações entre múltiplos bancos. Ele opera garantindo que uma transação só seja executada quando todos os bancos concordarem e estiverem prontos para realizar a transferência. Esse processo inclui uma fase de preparação, onde os dados são verificados, seguida pela fase final onde a transação é efetivamente realizada. É importante destacar que qualquer erro em qualquer uma das fases resultará no coordenador instruindo todos os bancos a desfazerem as operações realizadas, evitando assim inconsistências nos dados.</p>
     <h2>Conclusão</h2>
-    <p>Enfim, conclui-se que o projeto entregue abrange todos os requisitos solicitados no problema, abordando o uso de threads, criação de um broker para troca de mensagens, criação de uma dispositivo/atuador, uso de uma API RESTful , uso de docker para facilitar a execução do sistema por terceiros, o uso do software Insomnia para testes nas rotas e por fim o uso dos protocolos TCP e UDP para troca de mensagens.</p>
-    <p>Ademais, vale mencionar possíveis alterações para uma melhor usabilidade da interface do cliente como o uso de React para o front-end, adição de outros tipos de dispositivos ou até mesmo fazer uso de dispositivos reais.</p>
+    <p>Enfim, conclui-se que o projeto entregue abrange todos os requisitos solicitados no problema, abordando o uso de threads, gerenciamento de contas utilizando o protocolo <strong>HTTP</strong>, atomicidade das transações utilizando o protocolo <strong>2PC</strong> e tratamentos para problemas de concorrência utilizando a topologia de rede Token Ring para criação de um pix para sistemas bancários distribuidos.</p>
+    <p>Ademais, vale mencionar possíveis alterações para uma melhor usabilidade da interface do cliente como o uso de React para o front-end.</p>
   <h2>Como Executar o Projeto</h2> 
     <p>Siga os seguintes passos para a execução do projeto:</p>
     <ul>
