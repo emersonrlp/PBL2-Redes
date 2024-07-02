@@ -49,7 +49,7 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
             <p>-<strong>PUT</strong>, método responsável por atualizar um item na rota expecíficada.</p>
             <p>-<strong>DELETE</strong>, método responsável por deletar um item na rota expecíficada.</p>
         </ul>
-    <p><strong>Obs.:</strong> para testar se as rotas estavam funcionando foi utilizado o software Insomnia e Postman.</p>
+    <p><strong>Obs.:</strong> Para testar se as rotas estavam funcionando foi utilizado o software Insomnia e Postman.</p>
     <br>
     <p>Os dados para gerenciamento dessas contas pelas rotas são enviados no formato parecido com a de um dicionário, as seguintes imagens são referentes ao formato enviado para fazer saques e depositos, outra para criar cliente, outra para adicionar uma conta e a última para fazer uma transação.</p>
     <br>
@@ -88,15 +88,514 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
     <p><strong>Obs.:</strong> Embora eu tenha uma rota para criar cliente e outra para criar usuário, ao me referir a um cliente específico, estou falando de um usuário que possui uma conta associada ao seu ID. Ou seja, cliente e conta se referem ao mesmo usuário. Além disso, uma transação pode ter varias operações diferente do que está sendo mostrado na imagem que só tem uma.</p>
     <h2>Transferência entre diferentes contas</h2>
         <p>Como mencionado no tópico anterior é possível realizar transferências entre diferentes contas através da rota de transferências utilizando o formato demonstrado. Sendo que o campo "Usuário" refere-se ao ID do usuário que está realizando a transação, "id_destino" refere-se ao ID da conta de destino (destinatário da transferência), "id_origem" refere-se ao ID da conta do usuário naquele banco (ou de outro banco que ele também tenha conta), "valor" refere-se ao valor da transferência e o "status" refere-se ao status da transação que pode ser finalizada ou não.</p>
-        <p>Exemplo de transferência entre diferentes contas (imagem do valor retirado e depositado)</p>
-        <div align="center">
-            <figure>
-                <img src="https://github.com/emersonrlp/MI-de-Redes/blob/main/IMG/Captura%20de%20tela%202024-05-03%20210608.png" alt="Descrição da Imagem">
-                <br>
-                <figcaption>Comunicação Dispositivo-Broker</figcaption>
-            </figure>
-        </div>
+        <p>Segue dois exemplos de transações de diferentes contas para uma mesma conta de destino, todas de um mesmo banco:</p>
+        <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 154611.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Conta 1 envia 100 R$ para a conta 3</figcaption>
+                </figure>
+            </div>
+        <br>
+        <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 154626.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Conta 2 envia 100 R$ para a conta 3</figcaption>
+                </figure>
+            </div>
+        <br>
+        <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 154953.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Utilizando o Postman para fazer duas transações simultâneas</figcaption>
+                </figure>
+            </div>
+            <br>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154733.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta 1)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154854.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta 1)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154746.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta 2)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154908.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta 2)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154800.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta 3)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154918.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta 3)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
     <br>
+    <p>Percebe-se que as transferências acontecem com sucesso, pois existe saldo suficiênte para realizar as duas transações</p>
+    <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 154611.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Conta 1 envia 100 R$ para a conta 3</figcaption>
+                </figure>
+            </div>
+        <br>
+        <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 155059.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Conta 2 envia 150 R$ para a conta 3</figcaption>
+                </figure>
+            </div>
+        <br>
+        <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 154953.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Utilizando o Postman para fazer duas transações simultâneas</figcaption>
+                </figure>
+            </div>
+            <br>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154733.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta 1)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154854.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta 1)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154746.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta 2)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154746.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta 2)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154800.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta 3)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 155238.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta 3)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <br>
+    <p>Percebe-se que a primeira transferência acontece com sucesso, mas a segunda não, pois não existe saldo suficiênte para realizar as segunda transação</p>
+    <p>Segue dois exemplos de transações de diferentes contas para uma mesma conta de destino, sendo que existem dois bancos</p>
+    <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 162404.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Pacote que envia dinheiro da conta de diferentes bancos de um mesmo usuário</figcaption>
+                </figure>
+            </div>
+        <br>
+        <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 162833.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Utilização do Postman para testar a rota</figcaption>
+                </figure>
+            </div>
+        <br>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154733.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta b1)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154854.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta b1)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 160041.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta b2)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 162430.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta b2)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154800.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta 3)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154918.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta 3)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <br>
+    <p>Percebe-se que o Pacote de transferências acontecem com sucesso, pois existe saldo suficiênte para realizar as duas transações</p>
+    <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 162606.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Pacote que envia dinheiro da conta de diferentes bancos de um mesmo usuário</figcaption>
+                </figure>
+            </div>
+        <br>
+        <br>
+            <div align="center">
+                <figure>
+                    <img src="IMG/Captura de tela 2024-07-02 162833.png" alt="Descrição da Imagem">
+                    <br>
+                    <figcaption>Utilização do Postman para testar a rota</figcaption>
+                </figure>
+            </div>
+        <br>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154733.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta b1)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154733.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta b1)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 160041.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta b2)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 160041.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta b2)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <center>
+        <table align="center">
+            <tr>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154800.png" alt="Descrição da Imagem 1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Antes (Conta 3)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="center">
+                    <table>
+                        <tr>
+                            <td align="center">
+                                <img src="IMG/Captura de tela 2024-07-02 154800.png" alt="Descrição da Imagem 2">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <figcaption>Depois (Conta 3)</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <br>
+    <p>Percebe-se que o Pacote de transferências  não acontece com sucesso, pois não existe saldo suficiênte para realizar as segunda transação</p>
     <h2>Comunicação entre os Servidores</h2>
     <p>O protocolo de comunicação <strong>HTTP</strong> (HyperText Transfer Protocol) foi escolhido devido à sua ampla adoção e versatilidade na comunicação entre clientes e servidores na web. Ele é robusto e eficiente, permitindo a transferência de dados de maneira rápida e segura. A arquitetura cliente-servidor do <strong>HTTP</strong> facilita a implementação de sistemas distribuídos e escaláveis.</p>
     <p>Além disso, o <strong>HTTP</strong> é compatível com diversos tipos de dados, como texto, imagens, vídeos e outros formatos de mídia, tornando-o ideal para aplicações web que precisam transmitir diferentes tipos de conteúdo. O suporte a uma variedade de métodos de requisição, como <strong>GET</strong>, <strong>POST</strong>, <strong>PUT</strong> e <strong>DELETE</strong>, é essencial para operações <strong>CRUD</strong> (Create, Read, Update, Delete) em sistemas de gerenciamento de dados.</p>
