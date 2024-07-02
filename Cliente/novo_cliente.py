@@ -4,6 +4,7 @@ import requests
 import random
 import time
 
+#ip_local= os.getenv('IP_ADDRESS')
 ip_local = "192.168.1.103" #Pegar da variavel de ambiente
 
 def menu():

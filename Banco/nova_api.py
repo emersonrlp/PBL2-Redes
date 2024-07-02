@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 import threading
 import time
+import os
 
 app = Flask(__name__)
 
@@ -9,6 +10,7 @@ app = Flask(__name__)
 ips = ["http://192.168.1.103:8081", "http://192.168.1.104:8081"]
 indice_ip_atual = 0
 ip = "192.168.1.103"
+#ip= os.getenv('IP_ADDRESS')
 
 # Variável global para indicar se a máquina possui o token
 tem_token = False
