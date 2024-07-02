@@ -640,6 +640,45 @@ Dessa forma, pode-se assegurar que o sistema é confiável.
     <p>No caso de transações concorrentes, não há problema porque tanto o mecanismo de lock quanto o Token Ring garantem que nem clientes do mesmo banco, nem clientes de bancos diferentes, realizarão transações exatamente ao mesmo tempo. Isso significa que as transações só ocorrerão se houver saldo suficiente e no momento correto, evitando assim a duplicação de dinheiro em qualquer uma das contas.</p>
     <h2>Transações atômicas</h2>
     <p>O protocolo <strong>2PC</strong> foi utilizado para assegurar a consistência das transações entre múltiplos bancos. Ele opera garantindo que uma transação só seja executada quando todos os bancos concordarem e estiverem prontos para realizar a transferência. Esse processo inclui uma fase de preparação, onde os dados são verificados, seguida pela fase final onde a transação é efetivamente realizada. É importante destacar que qualquer erro em qualquer uma das fases resultará no coordenador instruindo todos os bancos a desfazerem as operações realizadas, evitando assim inconsistências nos dados.</p>
+    <h2>Interface</h2>
+    <p>Segue as imagens principais da interface CLI:</p>
+    <br>
+    <div align="center">
+        <figure>
+            <img src="IMG/Captura de tela 2024-07-02 193943.png" alt="Descrição da Imagem">
+            <br>
+            <figcaption>Tela onde o usuário decide se quer fazer login ou cadastro</figcaption>
+        </figure>
+    </div>
+    <br>
+    <br>
+        <div align="center">
+            <figure>
+                <img src="IMG/Captura de tela 2024-07-02 194047.png" alt="Descrição da Imagem">
+                <br>
+                <figcaption>Exemplo de quando ele decide fazer cadastro</figcaption>
+            </figure>
+        </div>
+    <br>
+    <br>
+        <div align="center">
+            <figure>
+                <img src="IMG/Captura de tela 2024-07-02 194203.png" alt="Descrição da Imagem">
+                <br>
+                <figcaption>Exemplo de quando ele decide fazer login</figcaption>
+            </figure>
+        </div>
+    <br>
+    <br>
+        <div align="center">
+            <figure>
+                <img src="IMG/Captura de tela 2024-07-02 194222.png" alt="Descrição da Imagem">
+                <br>
+                <figcaption>Exemplo de quando ele está logado</figcaption>
+            </figure>
+        </div>
+    <br>
+    <p><strong>Obs.:</strong> Quando ele está logado na conta ele pode fazer operações como consultar saldo, realizar depositos na conta daquele banco, realizar saques na conta daquele banco, realizar transferências de todas as suas contas cadastradas, cadastrar contas de outros bancos que ele tem acesso e visuaizar as contas que ele cadastrou. Para isso, será pedido informações assim como demonstrado na parte de gerenciamento de contas antes de realizar de fato as operações.</p>
     <h2>Conclusão</h2>
     <p>Enfim, conclui-se que o projeto entregue abrange todos os requisitos solicitados no problema, abordando o uso de threads, gerenciamento de contas utilizando o protocolo <strong>HTTP</strong>, atomicidade das transações utilizando o protocolo <strong>2PC</strong> e tratamentos para problemas de concorrência utilizando a topologia de rede Token Ring para criação de um pix para sistemas bancários distribuidos.</p>
     <p>Ademais, vale mencionar possíveis alterações para uma melhor usabilidade da interface do cliente como o uso de React para o front-end.</p>
