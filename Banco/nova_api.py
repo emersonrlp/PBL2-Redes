@@ -292,7 +292,7 @@ def fazer_transferencia():
         url_destino = f"http://{ip_inicial + str(nova_transferencia["id_destino"])[-ip_final_destino:]}:8081/receber"
            
         try:
-            url_origem = f"http://{ip_inicial + str(nova_transferencia["id_destino"])[-ip_final_origem:]}:8081/preparar"
+            url_origem = f"http://{ip_inicial + str(nova_transferencia["id_origem"])[-ip_final_origem:]}:8081/preparar"
             print(url_origem)
             response = requests.post(url_origem, json=nova_transferencia, timeout=1)
             
@@ -409,7 +409,7 @@ def fazer_transferencia():
 def receber_token():
     global tem_token, sequencia_token
     dados = request.get_json()
-    sequencia_recebida = dados.get('sequencia', -1)
+    sequencia_recebida = dados.get('sequencia')
     
     if sequencia_recebida > sequencia_token:
         sequencia_token = sequencia_recebida
@@ -417,6 +417,7 @@ def receber_token():
         print(f"Recebeu token com sequência {sequencia_token}")
         return jsonify({"status": "ok"})
     else:
+        print("Sequência inválida!")
         return jsonify({"status": "sequência inválida"}), 400
 
 @app.route('/verificar_token', methods=['GET'])
@@ -448,7 +449,7 @@ def passar_token():
                 tem_token = True
         
 def iniciar_servidor(ip, porta):
-    app.run(host=ip, port=porta)
+    app.run(host="0.0.0.0", port=porta)
 
 def monitorar_token():
     global tem_token, timeout_token
