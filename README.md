@@ -605,6 +605,33 @@ Devido aos avanços dos bancos brasileiros nos atendimentos móveis, que visam f
     Para evitar conflitos de dados entre servidores, adotamos a topologia de rede em anel, onde um token é passado de um nó para outro no sistema bancário. Essa abordagem garante que apenas o banco detentor do token possa realizar transferências, proporcionando controle sobre as operações. No entanto, a implementação dessa topologia pode apresentar desafios, como a possível perda do token, o que pode resultar em ociosidade no sistema.
 
 Para mitigar esse problema, estabelecemos que se um banco não receber o token por um período prolongado, ele iniciará um processo para gerar um novo token na rede. Isso visa evitar longos períodos de espera desnecessária entre os bancos na rede, mantendo a eficiência das operações. Além disso, para lidar com a situação em que uma máquina que perdeu o token retorna à rede, implementamos um número de sequência para cada token. Dessa forma, apenas o token com o número de sequência maior será reconhecido pela rede, prevenindo a ocorrência de concorrência com dois tokens simultâneos.
+<br>
+    <div align="center">
+        <figure>
+            <img src="IMG/Captura de tela 2024-07-02 151634.png" alt="Descrição da Imagem">
+            <br>
+            <figcaption>Exemplo do token sendo passado entre duas maquinas, sendo que a imagem representa a segunda maquina a receber o token</figcaption>
+        </figure>
+    </div>
+<br>
+<br>
+    <div align="center">
+        <figure>
+            <img src="IMG/imagem.png" alt="Descrição da Imagem">
+            <br>
+            <figcaption>Exemplo do token sendo gerado quando o tempo definido de espera ter terminado</figcaption>
+        </figure>
+    </div>
+<br>
+<br>
+    <div align="center">
+        <figure>
+            <img src="IMG/Captura de tela 2024-07-02 154029.png" alt="Descrição da Imagem">
+            <br>
+            <figcaption>Exemplo de quando um token com sequência inválida chega em uma máquina</figcaption>
+        </figure>
+    </div>
+<br>
 <h2>Confiabilidade do sistema</h2>
     Quando um dos bancos da rede sai do ar, os outros bancos não são afetados devido ao algoritmo implementado no Token Ring. Este algoritmo sempre tenta passar o token para o próximo banco conectado na rede. Se o próximo banco estiver desconectado, o token é passado para o banco subsequente e assim por diante. Além disso, se um banco que saiu do ar se reconectar, ele eventualmente voltará a receber o token.
     
