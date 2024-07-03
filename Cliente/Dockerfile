@@ -5,7 +5,7 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copie os arquivos necessários para o contêiner
-COPY novo_cliente.py .
+COPY cliente.py .
 COPY requirements.txt .
 
 # Defina a variável de ambiente IP
@@ -15,4 +15,4 @@ ENV IP_ADDRESS 192.168.1.100
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Defina o comando de inicialização
-CMD ["python", "novo_cliente.py"]
+CMD ["python", "cliente.py"]

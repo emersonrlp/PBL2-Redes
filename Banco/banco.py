@@ -1,4 +1,4 @@
-from nova_api import *
+from api import *
 
 def main():
     global tem_token, ip
