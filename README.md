@@ -688,6 +688,7 @@ Dessa forma, pode-se assegurar que o sistema é confiável.
       <li>baixe o repositório: 
           <a href="https://github.com/emersonrlp/PBL2-Redes">https://github.com/emersonrlp/PBL2-Redes.git</a>
       </li>
+      <li>adicione o ip de todas as maquinas que serão conectadas na lista de ips no arquivo api.py'</strong></li>
       <li>execute o seguinte comando com o terminal nas pastas Cliente e Banco: <strong>'docker build -t nome_do_arquivo .'</strong></li>
       <li>digite <strong>'docker images'</strong> para ver se as imagens docker foram criadas com sucesso.</li>
       <li>por fim, execute o programa usando o comando <strong>'docker run --network='host' -it -e IP_ADDRESS=ip_do_banco nome_da_imagem'</strong> para executar as imagens dos bancos e dos clientes.</li>
