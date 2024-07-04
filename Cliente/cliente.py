@@ -159,7 +159,15 @@ def criar_usuario():
 
 def obter_cliente(id):
     global ip_local
-    url_conta = f"http://{ip_local[:-3] + str(id)[-3:]}:8081/clientes/{id}"
+    #para ver a ultima parte do ip referente ao id da conta de destino
+    if len(str(id)) == 7:
+        ip_d = 3
+    elif len(str(id)) == 6:
+        ip_d = 2
+    else:
+        ip_d = 1
+
+    url_conta = f"http://{ip_local[:-ip_d] + str(id)[-ip_d:]}:8081/clientes/{id}"
     response = requests.get(url_conta)
     if response.status_code == 200:
         return response.json()

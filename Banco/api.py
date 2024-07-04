@@ -291,10 +291,16 @@ def fazer_transferencia():
             ip_inicial = ip[:-3]
         else:
             ip_inicial = ip.rsplit('.', 1)[0] + '.'
-        url_destino = f"http://{ip_inicial + str(nova_transferencia["id_destino"])[-ip_final_destino:]}:8081/receber"
+        id_destino_str = str(nova_transferencia["id_destino"])
+        url_destino = f"http://{ip_inicial + id_destino_str[-ip_final_destino:]}:8081/receber"
+
+        #url_destino = f"http://{ip_inicial + str(nova_transferencia["id_destino"])[-ip_final_destino:]}:8081/receber"
            
         try:
-            url_origem = f"http://{ip_inicial + str(nova_transferencia["id_origem"])[-ip_final_origem:]}:8081/preparar"
+            id_origem_str = str(nova_transferencia["id_origem"])
+            url_origem = f"http://{ip_inicial + id_origem_str[-ip_final_origem:]}:8081/receber"
+
+            #url_origem = f"http://{ip_inicial + str(nova_transferencia["id_origem"])[-ip_final_origem:]}:8081/preparar"
             print(url_origem)
             response = requests.post(url_origem, json=nova_transferencia, timeout=1)
             
@@ -303,24 +309,36 @@ def fazer_transferencia():
                 for item in lista_destino:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_destino =  f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
+                        id_str = str(item["id"])
+                        url_destino = f"http://{ip_inicial + id_str[-ip_final_destino:]}:8081/reverter"
+
+                        #url_destino =  f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                         print(url_destino)
                         print(item,  "1")
                         response = requests.post(url_destino, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_destino =  f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
+                            id_str = str(item["id"])
+                            url_destino = f"http://{ip_inicial + id_str[-ip_final_destino:]}:8081/reverter"
+
+                            #url_destino =  f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                             print(url_destino)
                             print(item,  "1")
                             response = requests.post(url_destino, json=item, timeout=1)
                 for item in lista_origem:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
+                        id_str = str(item["id"])
+                        url_origem = f"http://{ip_inicial + id_str[-ip_final_origem:]}:8081/reverter"
+
+                        #url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                         print(url_origem)
                         print(item,  "1")
                         response = requests.post(url_origem, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
+                            id_str = str(item["id"])
+                            url_origem = f"http://{ip_inicial + id_str[-ip_final_origem:]}:8081/reverter"
+
+                            #url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                             print(url_origem)
                             print(item,  "1")
                             response = requests.post(url_origem, json=item, timeout=1)
@@ -347,24 +365,36 @@ def fazer_transferencia():
                 for item in lista_destino:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
+                        id_str = str(item["id"])
+                        url_destino = f"http://{ip_inicial + id_str[-ip_final_destino:]}:8081/reverter"
+
+                        #url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                         print(url_destino)
                         print(item,  "2")
                         response = requests.post(url_destino, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
+                            id_str = str(item["id"])
+                            url_destino = f"http://{ip_inicial + id_str[-ip_final_destino:]}:8081/reverter"
+
+                            #url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                             print(url_destino)
                             print(item,  "2")
                             response = requests.post(url_destino, json=item, timeout=1)
                 for item in lista_origem:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
+                        id_str = str(item["id"])
+                        url_origem = f"http://{ip_inicial + id_str[-ip_final_origem:]}:8081/reverter"
+
+                        #url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                         print(url_origem)
                         print(item,  "2")
                         response = requests.post(url_origem, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
+                            id_str = str(item["id"])
+                            url_origem = f"http://{ip_inicial + id_str[-ip_final_origem:]}:8081/reverter"
+
+                            #url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                             print(url_origem)
                             print(item,  "2")
                             response = requests.post(url_origem, json=item, timeout=1)
@@ -379,24 +409,36 @@ def fazer_transferencia():
                 for item in lista_destino:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
+                        id_str = str(item["id"])
+                        url_destino = f"http://{ip_inicial + id_str[-ip_final_destino:]}:8081/reverter"
+
+                        #url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                         print(url_destino)
                         print(item,  "3")
                         response = requests.post(url_destino, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
+                            id_str = str(item["id"])
+                            url_destino = f"http://{ip_inicial + id_str[-ip_final_destino:]}:8081/reverter"
+
+                            #url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
                             print(url_destino)
                             print(item,  "3")
                             response = requests.post(url_destino, json=item, timeout=1)
                 for item in lista_origem:
                     if item["status"] == "preparado":
                         # Reverter dedução em caso de exceção
-                        url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
+                        id_str = str(item["id"])
+                        url_origem = f"http://{ip_inicial + id_str[-ip_final_origem:]}:8081/reverter"
+
+                        #url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                         print(url_origem)
                         print(item,  "3")
                         response = requests.post(url_origem, json=item, timeout=1)
                         while response.status_code != 201:
-                            url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
+                            id_str = str(item["id"])
+                            url_origem = f"http://{ip_inicial + id_str[-ip_final_origem:]}:8081/reverter"
+
+                            #url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
                             print(url_origem)
                             print(item,  "3")
                             response = requests.post(url_origem, json=item, timeout=1)
