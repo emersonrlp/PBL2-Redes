@@ -7,15 +7,16 @@ import os
 app = Flask(__name__)
 
 # Configurações de rede - altere esses IPs para os IPs das suas duas máquinas
-ips = ["http://192.168.1.103:8081", "http://192.168.1.101:8081", "http://192.168.1.104:8081"]
+ips = ["http://172.16.103.9:8081", "http://172.16.103.8:8081", "http://172.16.103.7:8081"]
 indice_ip_atual = 0
-ip = "192.168.1.103"
+ip = "172.16.103.9"
 #ip= os.getenv('IP_ADDRESS')
 
 # Variável global para indicar se a máquina possui o token
 tem_token = False
 sequencia_token = 0  # Sequência do token
-timeout_token = 30  # Tempo máximo de espera pelo token em segundos
+timeout_token = 30
+ultimo_tempo_token = time.time() # Tempo máximo de espera pelo token em segundos
 conectado = True
 
 # Estrutura de dados para armazenar clientes e suas contas
@@ -405,18 +406,11 @@ def fazer_transferencia():
                 
         except Exception as e:
             with lock:
-                # Reverter dedução em caso de exceção
-                for item in lista_destino:
-                    if item["status"] == "preparado":
-                        # Reverter dedução em caso de exceção
-                        id_str = str(item["id"])
-                        url_destino = f"http://{ip_inicial + id_str[-ip_final_destino:]}:8081/reverter"
-
-                        #url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
-                        print(url_destino)
-                        print(item,  "3")
-                        response = requests.post(url_destino, json=item, timeout=1)
-                        while response.status_code != 201:
+                try:
+                    # Reverter dedução em caso de exceção
+                    for item in lista_destino:
+                        if item["status"] == "preparado":
+                            # Reverter dedução em caso de exceção
                             id_str = str(item["id"])
                             url_destino = f"http://{ip_inicial + id_str[-ip_final_destino:]}:8081/reverter"
 
@@ -424,17 +418,17 @@ def fazer_transferencia():
                             print(url_destino)
                             print(item,  "3")
                             response = requests.post(url_destino, json=item, timeout=1)
-                for item in lista_origem:
-                    if item["status"] == "preparado":
-                        # Reverter dedução em caso de exceção
-                        id_str = str(item["id"])
-                        url_origem = f"http://{ip_inicial + id_str[-ip_final_origem:]}:8081/reverter"
+                            while response.status_code != 201:
+                                id_str = str(item["id"])
+                                url_destino = f"http://{ip_inicial + id_str[-ip_final_destino:]}:8081/reverter"
 
-                        #url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
-                        print(url_origem)
-                        print(item,  "3")
-                        response = requests.post(url_origem, json=item, timeout=1)
-                        while response.status_code != 201:
+                                #url_destino = f"http://{ip_inicial + str(item["id"])[-ip_final_destino:]}:8081/reverter"
+                                print(url_destino)
+                                print(item,  "3")
+                                response = requests.post(url_destino, json=item, timeout=1)
+                    for item in lista_origem:
+                        if item["status"] == "preparado":
+                            # Reverter dedução em caso de exceção
                             id_str = str(item["id"])
                             url_origem = f"http://{ip_inicial + id_str[-ip_final_origem:]}:8081/reverter"
 
@@ -442,7 +436,17 @@ def fazer_transferencia():
                             print(url_origem)
                             print(item,  "3")
                             response = requests.post(url_origem, json=item, timeout=1)
-                return False
+                            while response.status_code != 201:
+                                id_str = str(item["id"])
+                                url_origem = f"http://{ip_inicial + id_str[-ip_final_origem:]}:8081/reverter"
+
+                                #url_origem = f"http://{ip_inicial + str(item["id"])[-ip_final_origem:]}:8081/reverter"
+                                print(url_origem)
+                                print(item,  "3")
+                                response = requests.post(url_origem, json=item, timeout=1)
+                    return False
+                except Exception as e:
+                    return False
     return True
 
 ###################################################################
@@ -451,13 +455,14 @@ def fazer_transferencia():
 
 @app.route('/token', methods=['POST'])
 def receber_token():
-    global tem_token, sequencia_token
+    global tem_token, sequencia_token, ultimo_tempo_token
     dados = request.get_json()
     sequencia_recebida = dados.get('sequencia')
     
     if sequencia_recebida > sequencia_token:
         sequencia_token = sequencia_recebida
         tem_token = True
+        ultimo_tempo_token = time.time()
         print(f"Recebeu token com sequência {sequencia_token}")
         return jsonify({"status": "ok"})
     else:
@@ -484,38 +489,38 @@ def passar_token():
                     break
                 else:
                     print(f"Erro ao passar Token para {ips[i]}")
-                    #return False 
+                    break 
             except requests.exceptions.RequestException as e:
                 print(f"Erro ao conectar a {ips[i]}: {e}")
                 pass
         else:
             if conseguiu == False:
                 conectado = False
-                tem_token = True
         
 def iniciar_servidor(ip, porta):
     app.run(host="0.0.0.0", port=porta)
 
 def monitorar_token():
-    global tem_token, timeout_token
+    global tem_token, timeout_token, ultimo_tempo_token
     while True:
         try:
             if not tem_token:
-                ultimo_tempo_token = time.time()
                 while not tem_token:
                     time.sleep(1)
                     tempo_passado_token = time.time()
                     if (tempo_passado_token - ultimo_tempo_token) > timeout_token:
                         print("Tempo de espera do token excedido. Reeleição do token.")
+                        ultimo_tempo_token = time.time()
                         reeleger_token()
                         break
         except:
             pass
 
 def reeleger_token():
-    global sequencia_token, ips
+    global sequencia_token, ips, tem_token
     try:
         sequencia_token = sequencia_token + len(ips)
+        tem_token = False
         passar_token()
     except:
         print("Erro ao reeleger token!")
@@ -528,7 +533,7 @@ def iniciar():
         sequencia_token = 0
 
 def processamento():
-    global tem_token, transferencias, transferencias_finalizadas
+    global tem_token, transferencias, transferencias_finalizadas, conectado
     while True:
         if tem_token == True and conectado == True:
             # Simular recebimento de uma solicitação de processamento
@@ -550,6 +555,7 @@ def processamento():
             passar_token()
             
         elif tem_token == True and conectado == False:   
+            time.sleep(1)
             tem_token = False
             passar_token()
 

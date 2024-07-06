@@ -309,15 +309,15 @@ def main():
                     else:
                         print("Erro ao publicar transferência:", response.json())
 
-                    time.sleep(15)
-                    url_conta = f"http://{ip_local}:8081//transferencias_finalizadas/usuario/{id}"
-                    print(url_conta)
-                    response = requests.get(url_conta)
+                    #time.sleep(15)
+                    #url_conta = f"http://{ip_local}:8081//transferencias_finalizadas/usuario/{id}"
+                    #print(url_conta)
+                    #response = requests.get(url_conta)
 
-                    if response.status_code == 201:
-                        print("Transferencia realizada!")
-                    else:
-                        print("Erro ao realizar transferência!")
+                    #if response.status_code == 201:
+                    #    print("Transferencia realizada!")
+                    #else:
+                    #    print("Erro ao realizar transferência!")
 
                 elif num == "5":
                     id_conta = input("Digite o id da conta: ")
