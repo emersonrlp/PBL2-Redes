@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 
 # Configurações de rede - altere esses IPs para os IPs das suas duas máquinas
-ips = ["http://192.168.1.103:8081", "http://192.168.1.104:8081"]
+ips = ["http://192.168.1.103:8081", "http://192.168.1.101:8081", "http://192.168.1.104:8081"]
 indice_ip_atual = 0
 ip = "192.168.1.103"
 #ip= os.getenv('IP_ADDRESS')
@@ -298,7 +298,7 @@ def fazer_transferencia():
            
         try:
             id_origem_str = str(nova_transferencia["id_origem"])
-            url_origem = f"http://{ip_inicial + id_origem_str[-ip_final_origem:]}:8081/receber"
+            url_origem = f"http://{ip_inicial + id_origem_str[-ip_final_origem:]}:8081/preparar"
 
             #url_origem = f"http://{ip_inicial + str(nova_transferencia["id_origem"])[-ip_final_origem:]}:8081/preparar"
             print(url_origem)
@@ -483,7 +483,8 @@ def passar_token():
                     print(f"Token passado para {ips[i]}")
                     break
                 else:
-                    print(f"Erro ao passar Token para {ips[i]}") 
+                    print(f"Erro ao passar Token para {ips[i]}")
+                    #return False 
             except requests.exceptions.RequestException as e:
                 print(f"Erro ao conectar a {ips[i]}: {e}")
                 pass
