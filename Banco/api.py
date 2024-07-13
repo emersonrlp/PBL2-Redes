@@ -7,8 +7,8 @@ import os
 app = Flask(__name__)
 
 # Configurações de rede - altere esses IPs para os IPs das suas duas máquinas
-ips = ["http://172.16.103.9:8081", "http://172.16.103.8:8081", "http://172.16.103.7:8081"]
-ip = "172.16.103.9"
+ips = ["http://192.168.1.103:8081", "http://192.168.1.104:8081"]
+ip = "192.168.1.103"
 #ip= os.getenv('IP_ADDRESS')
 indice_ip_atual = ips.index(f"http://{ip}:8081")
 
